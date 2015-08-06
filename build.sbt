@@ -4,6 +4,13 @@ name := "rest-rpc-core"
 
 libraryDependencies ++= Seq("com.qifun.sbt-haxe" %% "test-interface" % "0.1.1" % Test)
 
+libraryDependencies += "com.qifun" %% "json-stream" % "0.2.3"
+
+libraryDependencies += "com.qifun" %% "json-stream" % "0.2.3" % HaxeJava classifier "haxe-java"
+
+libraryDependencies += "com.qifun" %% "json-stream" % "0.2.3" % HaxeCSharp classifier "haxe-csharp"
+
 for (c <- Seq(Compile, Test)) yield {
   haxeOptions in c += (baseDirectory.value / "build.hxml").getAbsolutePath
 }
+
