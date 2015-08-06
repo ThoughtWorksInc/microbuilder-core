@@ -4,6 +4,6 @@ import haxe.unit.TestCase;
 
 class ParserTest extends TestCase {
   public function test1() {
-    assertEquals("Parser", Parser.identity());
+    assertEquals("com.thoughtworks.restRpc.core.Parser", Parser.identity());
   }
 }
