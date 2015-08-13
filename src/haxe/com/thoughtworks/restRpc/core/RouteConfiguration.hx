@@ -1,11 +1,13 @@
 package com.thoughtworks.restRpc.core;
 
 class RouteConfiguration {
-    private var nameToUriTemplate: Map<String, UriTemplate>;
+    public var nameToUriTemplate: Map<String, UriTemplate>;
 }
 
 class UriTemplate {
-    private var template:String;
+    private var template: String;
+    private var verb: String;
+
     public function new(template:String) {
         this.template = template;
     }
