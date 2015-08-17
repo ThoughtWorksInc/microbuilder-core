@@ -1,3 +1,4 @@
 language: haxe
 haxe:
   - "3.2.0"
+script: sbt test
