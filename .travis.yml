@@ -1,7 +1,10 @@
 language: haxe
 haxe:
   - "3.2.0"
+before_install:
+  - travis_retry wget http://dl.bintray.com/sbt/debian/sbt-0.13.5.deb
+  - travis_retry sudo dpkg -i sbt-0.13.5.deb
+  - travis_retry sudo apt-get update
+  - travis_retry sudo apt-get install sbt
 script:
-  - sudo curl -s https://raw.githubusercontent.com/paulp/sbt-extras/master/sbt > /usr/local/bin/sbt
-  - sudo chmod 0755 /usr/local/bin/sbt
   - sbt test
