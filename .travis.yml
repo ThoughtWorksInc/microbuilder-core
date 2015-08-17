@@ -2,5 +2,6 @@ language: haxe
 haxe:
   - "3.2.0"
 script:
-  - curl -s https://raw.githubusercontent.com/paulp/sbt-extras/master/sbt > /usr/local/bin/sbt && chmod 0755 /usr/local/bin/sbt
+  - sudo curl -s https://raw.githubusercontent.com/paulp/sbt-extras/master/sbt > /usr/local/bin/sbt
+  - sudo chmod 0755 /usr/local/bin/sbt
   - sbt test
