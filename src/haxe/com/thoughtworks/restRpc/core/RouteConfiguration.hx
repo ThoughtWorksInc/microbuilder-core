@@ -1,18 +1,24 @@
 package com.thoughtworks.restRpc.core;
 
+import com.qifun.jsonStream.JsonStream;
+
 class RouteConfiguration {
-    public var nameToUriTemplate: Map<String, UriTemplate>;
+    public var nameToUriTemplate: Map<String, IUriTemplate>;
 }
 
-class UriTemplate {
-    private var template: String;
-    private var verb: String;
+/**
+ *
+ **/
+@:nativeGen
+interface IUriTemplate {
 
-    public function new(template:String) {
-        this.template = template;
-    }
+    public var method(get, never): String;
 
-    public function render(context: Dynamic):String{
-        return new haxe.Template(template).execute(context);
-    }
+    private function get_method():String;
+
+    /**
+     *约定参数列表的无法被uri template消费的参数（应该是最后一个）作为请求体
+     **/
+    public function render(parameters: Iterator<JsonStream>):String;
+
 }
