@@ -2,8 +2,8 @@ package com.thoughtworks.restRpc.core;
 
 import com.qifun.jsonStream.JsonStream;
 
-class RouteConfiguration {
-    public var nameToUriTemplate: Map<String, IUriTemplate> = new Map<String, IUriTemplate>();
+interface IRouteConfiguration {
+    public function nameToUriTemplate(name: String) : IUriTemplate;
 }
 
 /**
