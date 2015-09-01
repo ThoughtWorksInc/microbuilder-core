@@ -1,3 +1,7 @@
+enablePlugins(HaxeJavaPlugin)
+
+enablePlugins(HaxeCSharpPlugin)
+
 organization := "com.thoughtworks"
 
 name := "rest-rpc-core"
