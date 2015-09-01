@@ -1,5 +1,6 @@
 package com.thoughtworks.restRpc.core;
 
+import scala.collection.Iterator;
 import com.qifun.jsonStream.JsonStream;
 
 interface IRouteConfiguration {
