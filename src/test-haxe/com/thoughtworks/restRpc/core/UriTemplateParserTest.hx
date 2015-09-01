@@ -6,16 +6,12 @@ import haxe.ds.Vector;
 using Lambda;
 class UriTemplateParserTest extends TestCase {
 
-  public static function main(arguments:Vector<String>) {
-    var template = UriTemplateParser.parse_com_thoughtworks_restRpc_core_UriTemplate(cast new StringSource("xxx{?yy,asb}z"));
-    trace(template);
-  }
-
   public function test1() {
     var data = "xxx{yy}z";
     var source = new StringSource(data);
     var template = UriTemplateParser.parse_com_thoughtworks_restRpc_core_UriTemplate(source);
     assertEquals(data.length, source.position);
+    assertEquals("[LITERALS(UNRESERVED(120)),LITERALS(UNRESERVED(120)),LITERALS(UNRESERVED(120)),EXPRESSION(123,null,VARIABLE_LIST(VARSPEC(VARNAME(ALPHA(121),[DOT_VARCHAR(null,ALPHA(121))]),null),[]),125),LITERALS(UNRESERVED(122))]", Std.string(template));
   }
 
   public function test2() {
@@ -23,6 +19,7 @@ class UriTemplateParserTest extends TestCase {
     var source = new StringSource(data);
     var template = UriTemplateParser.parse_com_thoughtworks_restRpc_core_UriTemplate(source);
     assertEquals(data.length - 2, source.position);
+    assertEquals("[LITERALS(UNRESERVED(120)),LITERALS(UNRESERVED(120)),LITERALS(UNRESERVED(120)),EXPRESSION(123,null,VARIABLE_LIST(VARSPEC(VARNAME(ALPHA(121),[DOT_VARCHAR(null,ALPHA(121))]),null),[]),125)]", Std.string(template));
   }
 
   public function test3() {
@@ -30,14 +27,24 @@ class UriTemplateParserTest extends TestCase {
     var source = new StringSource(data);
     var template = UriTemplateParser.parse_com_thoughtworks_restRpc_core_UriTemplate(source);
     assertEquals(data.length - 2, source.position);
+    assertEquals("[LITERALS(UNRESERVED(120)),LITERALS(UNRESERVED(120)),LITERALS(UNRESERVED(120)),EXPRESSION(123,OP_LEVEL3(47),VARIABLE_LIST(VARSPEC(VARNAME(ALPHA(121),[DOT_VARCHAR(null,ALPHA(121))]),null),[]),125)]", Std.string(template));
   }
 
 
   public function test4() {
-    var data = "xxx{/yasdf.y,sadf,3}z";
+    var data = "a{/b.c}d";
     var source = new StringSource(data);
     var template = UriTemplateParser.parse_com_thoughtworks_restRpc_core_UriTemplate(source);
     assertEquals(data.length, source.position);
+    assertEquals("[LITERALS(UNRESERVED(97)),EXPRESSION(123,OP_LEVEL3(47),VARIABLE_LIST(VARSPEC(VARNAME(ALPHA(98),[DOT_VARCHAR(46,ALPHA(99))]),null),[]),125),LITERALS(UNRESERVED(100))]", Std.string(template));
+  }
+
+  public function test5() {
+    var data = "a{/b.c,d,efg,1}3";
+    var source = new StringSource(data);
+    var template = UriTemplateParser.parse_com_thoughtworks_restRpc_core_UriTemplate(source);
+    assertEquals(data.length, source.position);
+    assertEquals("[LITERALS(UNRESERVED(97)),EXPRESSION(123,OP_LEVEL3(47),VARIABLE_LIST(VARSPEC(VARNAME(ALPHA(98),[DOT_VARCHAR(46,ALPHA(99))]),null),[COMMA_VARSPEC(44,VARSPEC(VARNAME(ALPHA(100),[]),null)),COMMA_VARSPEC(44,VARSPEC(VARNAME(ALPHA(101),[DOT_VARCHAR(null,ALPHA(102)),DOT_VARCHAR(null,ALPHA(103))]),null)),COMMA_VARSPEC(44,VARSPEC(VARNAME(DIGIT(49),[]),null))]),125),LITERALS(UNRESERVED(51))]", Std.string(template));
   }
 
 }

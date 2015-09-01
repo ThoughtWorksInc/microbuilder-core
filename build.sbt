@@ -14,3 +14,6 @@ for (c <- Seq(Compile, Test)) yield {
   haxeOptions in c += (baseDirectory.value / "build.hxml").getAbsolutePath
 }
 
+for (c <- Seq(Compile, CSharp)) yield {
+  haxeOptions in c ++= Seq("--macro", """com.dongxiguo.autoParser.AutoParser.defineParser([ "com.thoughtworks.restRpc.core.UriTemplate" ], "com.thoughtworks.restRpc.core.UriTemplateParser")""")
+}

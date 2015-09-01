@@ -1,17 +1,20 @@
 package com.thoughtworks.restRpc.core;
 
+@:atom
 abstract Alpha(Int) {
   public static inline function accept(c:Int):Bool return {
     (c >= 0x41 && c <= 0x5A) || (c >= 0x61 && c <= 0x7A);
   }
 }
 
+@:atom
 abstract Digit(Int) {
   public static inline function accept(c:Int):Bool return {
     (c >= 0x30 && c <= 0x39);
   }
 }
 
+@:atom
 abstract HexDig(Int) {
   public static inline function accept(c:Int):Bool return {
     Digit.accept(c) || switch c {
@@ -21,12 +24,12 @@ abstract HexDig(Int) {
   }
 }
 
+@:enum
 abstract Percent(Int) {
-  public static inline function accept(c:Int):Bool return {
-    c == "%".code;
-  }
+  var CHARACTER = "%".code;
 }
 
+@:atom
 abstract Unreserved(Int) {
   public static inline function accept(c:Int):Bool return {
     switch c {
@@ -38,12 +41,14 @@ abstract Unreserved(Int) {
   }
 }
 
+@:atom
 abstract Reserved(Int) {
   public static inline function accept(c:Int):Bool return {
     GenDelims.accept(c) || SubDelims.accept(c);
   }
 }
 
+@:atom
 abstract GenDelims(Int) {
   public static inline function accept(c:Int):Bool return {
     switch c {
@@ -53,6 +58,7 @@ abstract GenDelims(Int) {
   }
 }
 
+@:atom
 abstract SubDelims(Int) {
   public static inline function accept(c:Int):Bool return {
     switch c {
@@ -71,35 +77,29 @@ enum Literals {
   IPRIVATE(iprivate:Iprivate);
 }
 
-
+@:enum
 abstract ExpressionBegin(Int) {
-  public static inline function accept(c:Int):Bool return {
-    c == "{".code;
-  }
+  var CHARACTER = "{".code;
 }
 
+@:enum
 abstract ExpressionEnd(Int) {
-  public static inline function accept(c:Int):Bool return {
-    c == "}".code;
-  }
+  var CHARACTER = "}".code;
 }
 
+@:enum
 abstract Comma(Int) {
-  public static inline function accept(c:Int):Bool return {
-    c == ",".code;
-  }
+  var CHARACTER = ",".code;
 }
 
+@:enum
 abstract Dot(Int) {
-  public static inline function accept(c:Int):Bool return {
-    c == ".".code;
-  }
+  var CHARACTER = ".".code;
 }
 
+@:enum
 abstract Underscore(Int) {
-  public static inline function accept(c:Int):Bool return {
-    c == "_".code;
-  }
+  var CHARACTER = "_".code;
 }
 
 enum Varchar {
@@ -117,14 +117,15 @@ enum DotVarchar {
 abstract RestVarchar(Array<DotVarchar>) {}
 
 enum Varname {
-  VARNAME(fist:Varchar, rest:RestVarchar);
+  VARNAME(first:Varchar, rest:RestVarchar);
 }
 
+@:enum
 abstract Colon(Int) {
-  public static inline function accept(c:Int):Bool return {
-    c == ":".code;
-  }
+  var CHARACTER = ":".code;
 }
+
+@:atom
 abstract NonZeroDigit(Int) {
   public static inline function accept(c:Int):Bool return {
     c >= "1".code && c <= "9".code;
@@ -142,10 +143,9 @@ enum Prefix {
   PREFIX(colon:Colon, maxLength:MaxLength);
 }
 
+@:enum
 abstract Explode(Int) {
-  public static inline function accept(c:Int):Bool return {
-    c == "*".code;
-  }
+  var CHARACTER = "*".code;
 }
 
 enum ModifierLevel4 {
@@ -168,31 +168,30 @@ enum VariableList {
   VARIABLE_LIST(first:Varspec, rest:RestVarspec);
 }
 
+@:enum
 abstract OpLevel2(Int) {
-  public static inline function accept(c:Int):Bool return {
-    switch c {
-      case "+".code, "#".code: true;
-      default: false;
-    }
-  }
+  var PLUS = "+".code;
+  var HASH = "#".code;
 }
 
+
+@:enum
 abstract OpLevel3(Int) {
-  public static inline function accept(c:Int):Bool return {
-    switch c {
-      case ".".code, "/".code, ";".code, "?".code, "&".code: true;
-      default: false;
-    }
-  }
+  var DOT = ".".code;
+  var SLASH = "/".code;
+  var SEMICOLON = ";".code;
+  var QUESTION_MARK = "?".code;
+  var AMPERSAND = "&".code;
 }
 
+@:enum
 abstract OpReserve(Int) {
-  public static inline function accept(c:Int):Bool return {
-    switch c {
-      case "=".code, ",".code, "!".code, "@".code, "|".code: true;
-      default: false;
-    }
-  }
+
+  var EQUALS = "=".code;
+  var COMMA = ",".code;
+  var EXCLAMATION = "!".code;
+  var AT = "@".code;
+  var PIPE = "|".code;
 }
 
 
@@ -210,6 +209,7 @@ enum LiteralsOrExpression {
 @:repeat(0)
 abstract UriTemplate(Array<LiteralsOrExpression>) {}
 
+@:atom
 abstract LiteralSingleChar(Int) {
   public static inline function accept(c:Int):Bool return switch (c) {
     case 0x21, 0x23, 0x24, 0x26: true;
@@ -226,6 +226,7 @@ abstract LiteralSingleChar(Int) {
   }
 }
 
+@:atom
 abstract Ucschar(Int) {
   public static inline function accept(c:Int):Bool return switch (c) {
     case c if (c >= 0xA0 && c <= 0xD7FF): true;
@@ -249,6 +250,7 @@ abstract Ucschar(Int) {
   }
 }
 
+@:atom
 abstract Iprivate(Int) {
   public static inline function accept(c:Int):Bool return switch (c) {
     case c if (c >= 0xE000 && c <= 0xF8FF): true;
