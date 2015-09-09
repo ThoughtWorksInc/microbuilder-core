@@ -21,3 +21,7 @@ for (c <- Seq(Compile, Test)) yield {
 for (c <- Seq(Compile, CSharp)) yield {
   haxeOptions in c ++= Seq("--macro", """com.dongxiguo.autoParser.AutoParser.defineParser([ "com.thoughtworks.restRpc.core.UriTemplate" ], "com.thoughtworks.restRpc.core.UriTemplateParser")""")
 }
+
+for (c <- Seq(Test, TestCSharp)) yield {
+  haxeOptions in c ++= Seq("--macro", """com.dongxiguo.autoParser.AutoParser.defineMacroParser([ "com.thoughtworks.restRpc.core.UriTemplate" ], "com.thoughtworks.restRpc.core.UriTemplateParser")""")
+}
