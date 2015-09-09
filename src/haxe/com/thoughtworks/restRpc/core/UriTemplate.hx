@@ -1,21 +1,21 @@
 package com.thoughtworks.restRpc.core;
 
 @:atom
-abstract Alpha(Int) {
+abstract Alpha(Int) from Int to Int {
   public static inline function accept(c:Int):Bool return {
     (c >= 0x41 && c <= 0x5A) || (c >= 0x61 && c <= 0x7A);
   }
 }
 
 @:atom
-abstract Digit(Int) {
+abstract Digit(Int) from Int to Int {
   public static inline function accept(c:Int):Bool return {
     (c >= 0x30 && c <= 0x39);
   }
 }
 
 @:atom
-abstract HexDig(Int) {
+abstract HexDig(Int) from Int to Int {
   public static inline function accept(c:Int):Bool return {
     Digit.accept(c) || switch c {
       case "A".code, "B".code, "C".code, "D".code, "E".code, "F".code: true;
@@ -25,12 +25,12 @@ abstract HexDig(Int) {
 }
 
 @:enum
-abstract Percent(Int) {
+abstract Percent(Int) from Int to Int {
   var CHARACTER = "%".code;
 }
 
 @:atom
-abstract Unreserved(Int) {
+abstract Unreserved(Int) from Int to Int {
   public static inline function accept(c:Int):Bool return {
     switch c {
       case c if (Alpha.accept(c)): true;
@@ -42,14 +42,14 @@ abstract Unreserved(Int) {
 }
 
 @:atom
-abstract Reserved(Int) {
+abstract Reserved(Int) from Int to Int {
   public static inline function accept(c:Int):Bool return {
     GenDelims.accept(c) || SubDelims.accept(c);
   }
 }
 
 @:atom
-abstract GenDelims(Int) {
+abstract GenDelims(Int) from Int to Int {
   public static inline function accept(c:Int):Bool return {
     switch c {
       case ":".code, "/".code, "?".code, "#".code, "[".code, "]".code, "@".code: true;
@@ -59,7 +59,7 @@ abstract GenDelims(Int) {
 }
 
 @:atom
-abstract SubDelims(Int) {
+abstract SubDelims(Int) from Int to Int {
   public static inline function accept(c:Int):Bool return {
     switch c {
       case "!".code, "$".code, "&".code, "'".code, "(".code, ")".code,
@@ -78,27 +78,27 @@ enum Literals {
 }
 
 @:enum
-abstract ExpressionBegin(Int) {
+abstract ExpressionBegin(Int) from Int to Int {
   var CHARACTER = "{".code;
 }
 
 @:enum
-abstract ExpressionEnd(Int) {
+abstract ExpressionEnd(Int) from Int to Int {
   var CHARACTER = "}".code;
 }
 
 @:enum
-abstract Comma(Int) {
+abstract Comma(Int) from Int to Int {
   var CHARACTER = ",".code;
 }
 
 @:enum
-abstract Dot(Int) {
+abstract Dot(Int) from Int to Int {
   var CHARACTER = ".".code;
 }
 
 @:enum
-abstract Underscore(Int) {
+abstract Underscore(Int) from Int to Int {
   var CHARACTER = "_".code;
 }
 
@@ -114,19 +114,26 @@ enum DotVarchar {
 }
 
 @:repeat(0)
-abstract RestVarchar(Array<DotVarchar>) {}
+abstract RestVarchar(Array<DotVarchar>) to Array<DotVarchar> from Array<DotVarchar> {}
 
-enum Varname {
-  VARNAME(first:Varchar, rest:RestVarchar);
+@:final
+class Varname {
+
+  public function new() {}
+
+  public var first:Varchar;
+
+  public var rest:RestVarchar;
+
 }
 
 @:enum
-abstract Colon(Int) {
+abstract Colon(Int) from Int to Int {
   var CHARACTER = ":".code;
 }
 
 @:atom
-abstract NonZeroDigit(Int) {
+abstract NonZeroDigit(Int) from Int to Int {
   public static inline function accept(c:Int):Bool return {
     c >= "1".code && c <= "9".code;
   }
@@ -135,16 +142,32 @@ abstract NonZeroDigit(Int) {
 @:repeat(0, 3)
 abstract NoMoreThanThreeDigit(Array<Digit>) {}
 
-enum MaxLength {
-  MAX_LENGTH(first:NonZeroDigit, rest:NoMoreThanThreeDigit);
+@:final
+class MaxLength {
+
+  public function new() {}
+
+  public var first:NonZeroDigit;
+
+  public var rest:NoMoreThanThreeDigit;
 }
 
-enum Prefix {
-  PREFIX(colon:Colon, maxLength:MaxLength);
+@:final
+class Prefix {
+
+  public function new() {}
+
+  public var colon(get, set):Null<Colon>;
+
+  inline function set_colon(value:Null<Colon>):Null<Colon> return value;
+
+  inline function get_colon():Null<Colon> return cast ":".code;
+
+  public var maxLength:MaxLength;
 }
 
 @:enum
-abstract Explode(Int) {
+abstract Explode(Int) from Int to Int {
   var CHARACTER = "*".code;
 }
 
@@ -153,8 +176,17 @@ enum ModifierLevel4 {
   EXPLODE(explode:Explode);
 }
 
-enum Varspec {
-  VARSPEC(varname:Varname, ?modifierLevel4:ModifierLevel4);
+
+@:final
+class Varspec {
+
+  public function new() {}
+
+  public var varname:Varname;
+
+  @:optional
+  public var modifierLevel4:ModifierLevel4;
+
 }
 
 enum CommaVarchar {
@@ -162,21 +194,28 @@ enum CommaVarchar {
 }
 
 @:repeat(0)
-abstract RestVarspec(Array<CommaVarchar>) {}
+abstract RestVarspec(Array<CommaVarchar>) to Array<CommaVarchar> {}
 
-enum VariableList {
-  VARIABLE_LIST(first:Varspec, rest:RestVarspec);
+@:final
+class VariableList {
+
+  public function new() {}
+
+  public var first:Varspec;
+
+  public var rest:RestVarspec;
+
 }
 
 @:enum
-abstract OpLevel2(Int) {
+abstract OpLevel2(Int) from Int to Int {
   var PLUS = "+".code;
   var HASH = "#".code;
 }
 
 
 @:enum
-abstract OpLevel3(Int) {
+abstract OpLevel3(Int) from Int to Int {
   var DOT = ".".code;
   var SLASH = "/".code;
   var SEMICOLON = ";".code;
@@ -185,7 +224,7 @@ abstract OpLevel3(Int) {
 }
 
 @:enum
-abstract OpReserve(Int) {
+abstract OpReserve(Int) from Int to Int {
 
   var EQUALS = "=".code;
   var COMMA = ",".code;
@@ -207,10 +246,34 @@ enum LiteralsOrExpression {
 }
 
 @:repeat(0)
-abstract UriTemplate(Array<LiteralsOrExpression>) {}
+abstract UriTemplate(Array<LiteralsOrExpression>) to Array<LiteralsOrExpression> {
+  
+  static function toNumber(hexDigit:Int):Int return {
+    if (hexDigit >= "0".code && hexDigit <= "9".code) {
+      hexDigit - "0".code;
+    } else if (hexDigit >= "a".code && hexDigit <= "f".code) {
+      10 + hexDigit - "a".code;
+    } else if (hexDigit >= "A".code && hexDigit <= "F".code) {
+      10 + hexDigit - "A".code;
+    } else {
+      throw 'Unknown hexDigit $hexDigit';
+    }
+  }
+  
+  public static function getCodePoint(literals:Literals):Int return {
+    switch literals {
+      case PCT_ENCODED(_, hexDig0, hexDig1): (toNumber(hexDig0) << 4) | toNumber(hexDig1);
+      case RESERVED(reserved): reserved;
+      case UNRESERVED(unreserved): unreserved;
+      case UCSCHAR(ucschar): ucschar;
+      case IPRIVATE(iprivate): iprivate;
+    }
+  }
+
+}
 
 @:atom
-abstract LiteralSingleChar(Int) {
+abstract LiteralSingleChar(Int) from Int to Int {
   public static inline function accept(c:Int):Bool return switch (c) {
     case 0x21, 0x23, 0x24, 0x26: true;
     case c if (c >= 0x28 && c <= 0x3B): true;
@@ -227,7 +290,7 @@ abstract LiteralSingleChar(Int) {
 }
 
 @:atom
-abstract Ucschar(Int) {
+abstract Ucschar(Int) from Int to Int {
   public static inline function accept(c:Int):Bool return switch (c) {
     case c if (c >= 0xA0 && c <= 0xD7FF): true;
     case c if (c >= 0xF900 && c <= 0xFDCF): true;
@@ -251,7 +314,7 @@ abstract Ucschar(Int) {
 }
 
 @:atom
-abstract Iprivate(Int) {
+abstract Iprivate(Int) from Int to Int {
   public static inline function accept(c:Int):Bool return switch (c) {
     case c if (c >= 0xE000 && c <= 0xF8FF): true;
     case c if (c >= 0xF0000 && c <= 0xFFFFD): true;
