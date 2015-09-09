@@ -4,6 +4,7 @@ import com.qifun.jsonStream.JsonStream;
 
 interface IRouteConfiguration {
     public function nameToUriTemplate(name: String) : Null<IUriTemplate>;
+    public function failureClassName():String;
 }
 
 /**
