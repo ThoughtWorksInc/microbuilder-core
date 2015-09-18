@@ -3,7 +3,7 @@ package com.thoughtworks.restRpc.core;
 import com.qifun.jsonStream.JsonStream;
 
 interface IRouteConfiguration {
-    public function nameToUriTemplate(name: String) : IUriTemplate;
+    public function nameToUriTemplate(name: String) : Null<IUriTemplate>;
 }
 
 /**

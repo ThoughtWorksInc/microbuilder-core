@@ -1,5 +1,8 @@
 package com.thoughtworks.restRpc.core;
 
+import haxe.io.BytesOutput;
+import haxe.io.Eof;
+import haxe.io.StringInput;
 @:atom
 abstract Alpha(Int) from Int to Int {
   public static inline function accept(c:Int):Bool return {
@@ -16,6 +19,29 @@ abstract Digit(Int) from Int to Int {
 
 @:atom
 abstract HexDig(Int) from Int to Int {
+
+  public static function toInt(digit:HexDig):Int return {
+    if ((digit:Int) >= "0".code && (digit:Int) <= "9".code) {
+      (digit:Int) - "0".code;
+    } else if ((digit:Int) >= "A".code && (digit:Int) <= "F".code) {
+      (digit:Int) - "A".code;
+    } else {
+      throw "Expect [0-9A-F]";
+    }
+  }
+
+  public static function fromInt(i:Int):HexDig return {
+    if (i < 0) {
+      throw "Expect [0, 16)";
+    } else if (i <= 9) {
+      "0".code + i;
+    } else if (i <= 0xF) {
+      "A".code + (i - 0xA);
+    } else {
+      throw "Expect [0, 16)";
+    }
+  }
+
   public static inline function accept(c:Int):Bool return {
     Digit.accept(c) || switch c {
       case "A".code, "B".code, "C".code, "D".code, "E".code, "F".code: true;
@@ -68,6 +94,103 @@ abstract SubDelims(Int) from Int to Int {
     }
   }
 }
+
+@:repeat(0)
+abstract UnreservedCaptured(Array<UnreservedCharacter>) from Array<UnreservedCharacter> to Array<UnreservedCharacter> {}
+
+enum UnreservedCharacter {
+  UNRESERVED(unreserved:Unreserved);
+  PCT_ENCODED(percent:Percent, hexDig0:HexDig, hexDig1:HexDig);
+}
+
+@:rewrite
+abstract SimpleStringExpansion(String) from String to String {
+
+  public static function rewriteTo(self:SimpleStringExpansion):UnreservedCaptured return {
+    if (self == null) {
+      [];
+    } else {
+      var input = new StringInput(self);
+      var output = [];
+      try {
+        while (true) {
+          var b = input.readByte();
+          if (Unreserved.accept(b)) {
+            output.push(UnreservedCharacter.UNRESERVED(b));
+          } else {
+            output.push(UnreservedCharacter.PCT_ENCODED(Percent.CHARACTER, HexDig.fromInt(b >>> 4), HexDig.fromInt(b & 0xF)));
+          }
+        }
+      } catch(e:Eof) {
+        // Break the while loop and do nothing.
+      }
+      output;
+    }
+  }
+
+  public static function rewriteFrom(from:UnreservedCaptured):SimpleStringExpansion return {
+    var buffer = new BytesOutput(); // TODO:
+    for (c in (from:Array<UnreservedCharacter>)) {
+      switch c {
+        case UNRESERVED(b):
+          buffer.writeByte(b);
+        case PCT_ENCODED(_, high, low):
+          buffer.writeByte((HexDig.toInt(high) << 4) | HexDig.toInt(low));
+      }
+    }
+    buffer.getBytes().toString();
+  }
+
+}
+
+@:repeat(0)
+abstract ReservedCaptured(Array<Literals>) from Array<Literals> to Array<Literals> {}
+
+@:rewrite
+abstract ReservedExpansion(String) from String to String {
+  public static function rewriteTo(self:ReservedExpansion):ReservedCaptured return {
+    if (self == null) {
+      [];
+    } else {
+      var input = new StringInput(self);
+      var output = [];
+      try {
+        while (true) {
+          var b = input.readByte();
+          if (Unreserved.accept(b)) {
+            output.push(Literals.UNRESERVED(b));
+          } else if (Reserved.accept(b)) {
+            output.push(Literals.RESERVED(b));
+          } else {
+            output.push(Literals.PCT_ENCODED(Percent.CHARACTER, HexDig.fromInt(b >>> 4), HexDig.fromInt(b & 0xF)));
+          }
+        }
+      } catch(e:Eof) {
+        // Break the while loop and do nothing.
+      }
+      output;
+    }
+  }
+  public static function rewriteFrom(from:ReservedCaptured):ReservedExpansion return {
+    var buffer = new BytesOutput(); // TODO:
+    for (c in (from:Array<Literals>)) {
+      switch c {
+        case UNRESERVED(b):
+          buffer.writeByte(b);
+        case RESERVED(b):
+          buffer.writeByte(b);
+        case UCSCHAR(b):
+          buffer.writeByte(b);
+        case IPRIVATE(b):
+          buffer.writeByte(b);
+        case PCT_ENCODED(_, high, low):
+          buffer.writeByte((HexDig.toInt(high) << 4) | HexDig.toInt(low));
+      }
+    }
+    buffer.getBytes().toString();
+  }
+}
+
 
 enum Literals {
   RESERVED(reserved:Reserved);
@@ -246,31 +369,7 @@ enum LiteralsOrExpression {
 }
 
 @:repeat(0)
-abstract UriTemplate(Array<LiteralsOrExpression>) to Array<LiteralsOrExpression> {
-  
-  static function toNumber(hexDigit:Int):Int return {
-    if (hexDigit >= "0".code && hexDigit <= "9".code) {
-      hexDigit - "0".code;
-    } else if (hexDigit >= "a".code && hexDigit <= "f".code) {
-      10 + hexDigit - "a".code;
-    } else if (hexDigit >= "A".code && hexDigit <= "F".code) {
-      10 + hexDigit - "A".code;
-    } else {
-      throw 'Unknown hexDigit $hexDigit';
-    }
-  }
-  
-  public static function getCodePoint(literals:Literals):Int return {
-    switch literals {
-      case PCT_ENCODED(_, hexDig0, hexDig1): (toNumber(hexDig0) << 4) | toNumber(hexDig1);
-      case RESERVED(reserved): reserved;
-      case UNRESERVED(unreserved): unreserved;
-      case UCSCHAR(ucschar): ucschar;
-      case IPRIVATE(iprivate): iprivate;
-    }
-  }
-
-}
+abstract UriTemplate(Array<LiteralsOrExpression>) to Array<LiteralsOrExpression> {}
 
 @:atom
 abstract LiteralSingleChar(Int) from Int to Int {
