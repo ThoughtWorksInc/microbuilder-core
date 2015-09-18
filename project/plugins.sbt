@@ -1,3 +1,3 @@
-logLevel := Level.Warn
+lazy val root = project in file(".") dependsOn `sbt-haxe`
 
-addSbtPlugin("com.qifun" % "sbt-haxe" % "1.3.0")
+lazy val `sbt-haxe` = RootProject(uri("https://github.com/ThoughtWorksInc/sbt-haxe#haxe-macro"))
