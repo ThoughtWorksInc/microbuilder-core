@@ -437,7 +437,6 @@ class RouteConfigurationFactory {
                           }
                         }
                       }
-                      trace(variableMap);
                       var fillingExprs = [
                         for (i in 0...numberOfUriParameters) {
                           var arg = args[i];
