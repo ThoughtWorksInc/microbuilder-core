@@ -16,6 +16,9 @@ class GeneratedRouteConfiguration implements IRouteConfiguration {
     uriTemplateMap.get(name);
   }
 
+    public function failureClassName():String {
+        throw  "Not Implemented";
+    }
 }
 
 @:final
