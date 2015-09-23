@@ -14,7 +14,7 @@ interface IRouteConfiguration {
 
 /**
  *
- **/
+ */
 @:nativeGen
 interface IUriTemplate {
 
@@ -22,9 +22,9 @@ interface IUriTemplate {
 
   private function get_method():String;
 
-/**
-     *约定参数列表的无法被uri template消费的参数（应该是最后一个）作为请求体
-     **/
+  /**
+   * 约定参数列表的无法被uri template消费的参数（应该是最后一个）作为请求体
+   */
   public function render(parameters:Iterator<JsonStream>):String;
 
 }
