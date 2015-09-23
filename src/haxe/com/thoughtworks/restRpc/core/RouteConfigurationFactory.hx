@@ -1,4 +1,5 @@
 package com.thoughtworks.restRpc.core;
+import haxe.macro.Printer;
 import haxe.ds.IntMap;
 import haxe.ds.StringMap;
 import com.thoughtworks.restRpc.core.UriTemplate;
@@ -296,7 +297,7 @@ class RouteConfigurationFactory {
                                   throw "Level 1-3 templates do not support modifiers.";
                                 } else {
                                   var variableFieldName = generatedVariableFieldName(varspec.varname);
-                                  macro __uriParameters.$variableFieldName = null;
+                                  macro __uriParameters.$variableFieldName = __stringValue;
                                 }
                               }
                             ];
@@ -457,6 +458,7 @@ class RouteConfigurationFactory {
                           }
                         }
                       ];
+//                      trace(new Printer().printExpr(macro {$a{fillingExprs}}));
                       keyValues.push(
                         macro $v{fieldName} =>
                         (
@@ -500,23 +502,6 @@ class RouteConfigurationFactory {
                   com.thoughtworks.restRpc.core.GeneratedRouteConfiguration.getTypeName($structuralFailureExpr))
               })
             });
-//            kind : FFun({
-//              params: [ { name: "Position" } ],
-//              args :
-//              [
-//                {
-//                  name : "__source",
-//                  type : null
-//                }
-//              ],
-//              ret: macro: com.thoughtworks.restRpc.core.IRouteConfiguration, // TODO: 展开泛型参数
-//              expr: macro return {
-//                new RouteConfiguration("GET", function())
-//              }
-//            }),
-//            pos: PositionTools.here()
-
-
           }
           case _: {
             continue;
