@@ -91,10 +91,20 @@ class RouteConfigurationFactory {
     var thisClassExpr = macro $modulePath.$className;
     var fields = [];
     var uriParametersDefinitions:Array<TypeDefinition> = [];
+    var structuralFailureExpr:Expr;
     for (moduleName in includeModules) {
       for (rootType in Context.getModule(moduleName)) {
         switch (rootType) {
           case TInst(_.get() => classType, args) if (classType.isInterface): {
+            structuralFailureExpr = switch classType.meta.extract(":structuralFailure") {
+              case []:
+                macro null;
+              case [ { params: [ expr ] } ]:
+                expr;
+              case entries:
+                throw Context.error("Expect @:structuralFailure(packageName.FailureClassName)", entries[0].pos);
+
+            }
             var methodName = generatedMethodName(classType.pack, classType.name);
             var keyValues = [];
             for (field in classType.fields.get()) {
@@ -485,7 +495,9 @@ class RouteConfigurationFactory {
               kind : FFun({
                 args: [],
                 ret: macro : com.thoughtworks.restRpc.core.IRouteConfiguration,
-                expr: macro return new com.thoughtworks.restRpc.core.GeneratedRouteConfiguration($mapExpr)
+                expr: macro return new com.thoughtworks.restRpc.core.GeneratedRouteConfiguration(
+                  $mapExpr,
+                  com.thoughtworks.restRpc.core.GeneratedRouteConfiguration.getTypeName($structuralFailureExpr))
               })
             });
 //            kind : FFun({
