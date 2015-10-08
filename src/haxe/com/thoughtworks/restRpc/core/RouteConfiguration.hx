@@ -6,7 +6,7 @@ import haxe.ds.Vector;
 interface IRouteConfiguration {
     public function nameToUriTemplate(name: String) : IUriTemplate;
 
-    public function matchUri(uri: String) : Vector<JsonStream>;
+    public function matchUri(method: String, uri: String, body: JsonStream, contentType: Null<String>) : Vector<JsonStream>;
 }
 
 /**
