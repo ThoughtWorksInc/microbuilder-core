@@ -1,4 +1,5 @@
 package com.thoughtworks.restRpc.core;
+import haxe.macro.Printer;
 import haxe.ds.IntMap;
 import haxe.ds.StringMap;
 import com.thoughtworks.restRpc.core.UriTemplate;
@@ -91,10 +92,20 @@ class RouteConfigurationFactory {
     var thisClassExpr = macro $modulePath.$className;
     var fields = [];
     var uriParametersDefinitions:Array<TypeDefinition> = [];
+    var structuralFailureExpr:Expr;
     for (moduleName in includeModules) {
       for (rootType in Context.getModule(moduleName)) {
         switch (rootType) {
           case TInst(_.get() => classType, args) if (classType.isInterface): {
+            structuralFailureExpr = switch classType.meta.extract(":structuralFailure") {
+              case []:
+                macro null;
+              case [ { params: [ expr ] } ]:
+                expr;
+              case entries:
+                throw Context.error("Expect @:structuralFailure(packageName.FailureClassName)", entries[0].pos);
+
+            }
             var methodName = generatedMethodName(classType.pack, classType.name);
             var keyValues = [];
             for (field in classType.fields.get()) {
@@ -286,7 +297,7 @@ class RouteConfigurationFactory {
                                   throw "Level 1-3 templates do not support modifiers.";
                                 } else {
                                   var variableFieldName = generatedVariableFieldName(varspec.varname);
-                                  macro __uriParameters.$variableFieldName = null;
+                                  macro __uriParameters.$variableFieldName = __stringValue;
                                 }
                               }
                             ];
@@ -447,6 +458,7 @@ class RouteConfigurationFactory {
                           }
                         }
                       ];
+//                      trace(new Printer().printExpr(macro {$a{fillingExprs}}));
                       keyValues.push(
                         macro $v{fieldName} =>
                         (
@@ -485,26 +497,11 @@ class RouteConfigurationFactory {
               kind : FFun({
                 args: [],
                 ret: macro : com.thoughtworks.restRpc.core.IRouteConfiguration,
-                expr: macro return new com.thoughtworks.restRpc.core.GeneratedRouteConfiguration($mapExpr)
+                expr: macro return new com.thoughtworks.restRpc.core.GeneratedRouteConfiguration(
+                  $mapExpr,
+                  com.thoughtworks.restRpc.core.GeneratedRouteConfiguration.getTypeName($structuralFailureExpr))
               })
             });
-//            kind : FFun({
-//              params: [ { name: "Position" } ],
-//              args :
-//              [
-//                {
-//                  name : "__source",
-//                  type : null
-//                }
-//              ],
-//              ret: macro: com.thoughtworks.restRpc.core.IRouteConfiguration, // TODO: 展开泛型参数
-//              expr: macro return {
-//                new RouteConfiguration("GET", function())
-//              }
-//            }),
-//            pos: PositionTools.here()
-
-
           }
           case _: {
             continue;
