@@ -4,7 +4,8 @@ import com.qifun.jsonStream.JsonStream;
 import haxe.ds.Vector;
 
 interface IRouteConfiguration {
-    public function nameToUriTemplate(name: String) : IUriTemplate;
+    public function nameToUriTemplate(name: String) : Null<IUriTemplate>;
+    public function failureClassName():String;
 
     public function matchUri(method: String, uri: String, body: JsonStream, contentType: Null<String>) : Vector<JsonStream>;
 }
