@@ -52,12 +52,3 @@ for (c <- AllTestTargetConfigurations) yield {
 for (c <- Seq(CSharp, TestCSharp)) yield {
   haxeOptions in c ++= Seq("-lib", "HUGS")
 }
-
-for (c <- Seq(Compile, Test)) yield {
-  haxeOptions in c ++= Seq("-dce", "no")
-}
-
-for (c <- Seq(Compile, Test)) yield {
-  haxeOptions in c ++= Seq("-lib", "continuation")
-}
-
