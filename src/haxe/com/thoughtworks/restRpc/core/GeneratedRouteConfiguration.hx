@@ -1,6 +1,6 @@
-package com.thoughtworks.restRpc.core;
+package com.thoughtworks.microbuilder.core;
 
-import com.thoughtworks.restRpc.core.IRouteConfiguration;
+import com.thoughtworks.microbuilder.core.IRouteConfiguration;
 import com.qifun.jsonStream.JsonStream;
 import haxe.ds.StringMap;
 

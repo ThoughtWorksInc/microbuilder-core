@@ -1,6 +1,6 @@
-package com.thoughtworks.restRpc.core;
+package com.thoughtworks.microbuilder.core;
 
-import com.thoughtworks.restRpc.core.UriTemplate;
+import com.thoughtworks.microbuilder.core.UriTemplate;
 import haxe.macro.Context;
 import haxe.macro.Expr;
 import haxe.macro.ExprTools;
@@ -15,7 +15,7 @@ class UriTemplateParserTest extends JsonTestCase {
   public function test1() {
     var data = "xxx{yy}z";
     var source = new StringSource(data);
-    var template = UriTemplateParser.parse_com_thoughtworks_restRpc_core_UriTemplate(source);
+    var template = UriTemplateParser.parse_com_thoughtworks_microbuilder_core_UriTemplate(source);
     assertEquals(data.length, source.position);
     this.assertMatch(
       (_:Array<LiteralsOrExpression>) =>
@@ -38,7 +38,7 @@ class UriTemplateParserTest extends JsonTestCase {
   public function test2() {
     var data = "xxx{yy} z";
     var source = new StringSource(data);
-    var template = UriTemplateParser.parse_com_thoughtworks_restRpc_core_UriTemplate(source);
+    var template = UriTemplateParser.parse_com_thoughtworks_microbuilder_core_UriTemplate(source);
     assertEquals(data.length - 2, source.position);
     this.assertMatch(
       (_:Array<LiteralsOrExpression>) =>
@@ -61,7 +61,7 @@ class UriTemplateParserTest extends JsonTestCase {
   public function test3() {
     var data = "xxx{/yy} z";
     var source = new StringSource(data);
-    var template = UriTemplateParser.parse_com_thoughtworks_restRpc_core_UriTemplate(source);
+    var template = UriTemplateParser.parse_com_thoughtworks_microbuilder_core_UriTemplate(source);
     assertEquals(data.length - 2, source.position);
     this.assertMatch(
       (_:Array<LiteralsOrExpression>) =>
@@ -85,7 +85,7 @@ class UriTemplateParserTest extends JsonTestCase {
   public function test4() {
     var data = "a{/b.c}d";
     var source = new StringSource(data);
-    var template = UriTemplateParser.parse_com_thoughtworks_restRpc_core_UriTemplate(source);
+    var template = UriTemplateParser.parse_com_thoughtworks_microbuilder_core_UriTemplate(source);
     assertEquals(data.length, source.position);
     this.assertMatch(
       (_:Array<LiteralsOrExpression>) =>
@@ -109,7 +109,7 @@ class UriTemplateParserTest extends JsonTestCase {
   public function test5() {
     var data = "a{/b.c,d,efg,1}3";
     var source = new StringSource(data);
-    var template = UriTemplateParser.parse_com_thoughtworks_restRpc_core_UriTemplate(source);
+    var template = UriTemplateParser.parse_com_thoughtworks_microbuilder_core_UriTemplate(source);
     assertEquals(data.length, source.position);
     this.assertMatch(
       (_:Array<LiteralsOrExpression>) =>

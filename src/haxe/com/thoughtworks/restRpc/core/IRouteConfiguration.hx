@@ -1,4 +1,4 @@
-package com.thoughtworks.restRpc.core;
+package com.thoughtworks.microbuilder.core;
 
 import com.qifun.jsonStream.JsonStream;
 

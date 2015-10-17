@@ -1,8 +1,8 @@
-package com.thoughtworks.restRpc.core;
+package com.thoughtworks.microbuilder.core;
 
 using com.qifun.jsonStream.Plugins;
 
 @:build(com.qifun.jsonStream.JsonSerializer.generateSerializer([
-  "com.thoughtworks.restRpc.core.Failure"
+  "com.thoughtworks.microbuilder.core.Failure"
 ]))
 class CoreSerializer {}

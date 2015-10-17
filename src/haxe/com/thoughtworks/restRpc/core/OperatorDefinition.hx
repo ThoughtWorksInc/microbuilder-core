@@ -1,4 +1,4 @@
-package com.thoughtworks.restRpc.core;
+package com.thoughtworks.microbuilder.core;
 
 enum Allow {
   U;

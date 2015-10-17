@@ -1,8 +1,8 @@
-package com.thoughtworks.restRpc.core;
+package com.thoughtworks.microbuilder.core;
 import haxe.macro.Printer;
 import haxe.ds.IntMap;
 import haxe.ds.StringMap;
-import com.thoughtworks.restRpc.core.UriTemplate;
+import com.thoughtworks.microbuilder.core.UriTemplate;
 import com.dongxiguo.autoParser.StringBuffer;
 import haxe.macro.PositionTools;
 import haxe.macro.MacroStringTools;
@@ -137,7 +137,7 @@ class RouteConfigurationFactory {
                       }
                       var source = new StringSource(uriTemplateText);
                       var variableMap = new VariableMap();
-                      var uriTemplate:Array<LiteralsOrExpression> = UriTemplateParser.parse_com_thoughtworks_restRpc_core_UriTemplate(source);
+                      var uriTemplate:Array<LiteralsOrExpression> = UriTemplateParser.parse_com_thoughtworks_microbuilder_core_UriTemplate(source);
                       var uriParameterName = generateUriParametersClassName(className, classType.pack, classType.name, fieldName);
                       var uriParameterFields:Array<Field> = [{
                         name: "new",
@@ -159,15 +159,15 @@ class RouteConfigurationFactory {
                               name: 'character_$i',
                               pos: PositionTools.here(),
                               access: [ APublic ],
-                              kind: FProp("get", "set", macro : com.thoughtworks.restRpc.core.UriTemplate.Literals, null)
+                              kind: FProp("get", "set", macro : com.thoughtworks.microbuilder.core.UriTemplate.Literals, null)
                             });
                             uriParameterFields.push({
                               name: 'set_character_$i',
                               pos: PositionTools.here(),
                               kind: FFun(
                                 {
-                                  args: [ { name: "value", type: macro : com.thoughtworks.restRpc.core.UriTemplate.Literals } ],
-                                  ret: macro : com.thoughtworks.restRpc.core.UriTemplate.Literals,
+                                  args: [ { name: "value", type: macro : com.thoughtworks.microbuilder.core.UriTemplate.Literals } ],
+                                  ret: macro : com.thoughtworks.microbuilder.core.UriTemplate.Literals,
                                   expr: macro return switch value {
                                     case $v{literals}: value;
                                     default: null;
@@ -181,7 +181,7 @@ class RouteConfigurationFactory {
                               kind: FFun(
                                 {
                                   args: [ ],
-                                  ret: macro : com.thoughtworks.restRpc.core.UriTemplate.Literals,
+                                  ret: macro : com.thoughtworks.microbuilder.core.UriTemplate.Literals,
                                   expr: macro return $v{literals}
                                 }
                               )
@@ -198,7 +198,7 @@ class RouteConfigurationFactory {
                                       throw "Level 1-3 templates does not support modifiers.";
                                     }
                                     var buffer = new StringBuffer();
-                                    UriTemplateFormatter.format_com_thoughtworks_restRpc_core_Varname(buffer, varspec.varname);
+                                    UriTemplateFormatter.format_com_thoughtworks_microbuilder_core_Varname(buffer, varspec.varname);
                                     var varname = buffer.toString();
                                     var variablePath = varname.split(".");
                                     var variableFieldName = generatedFieldName(variablePath);
@@ -224,7 +224,7 @@ class RouteConfigurationFactory {
                                       access: [ APublic ],
                                       name: variableFieldName,
                                       pos: PositionTools.here(),
-                                      kind: FVar(macro : com.thoughtworks.restRpc.core.UriTemplate.SimpleStringExpansion, null)
+                                      kind: FVar(macro : com.thoughtworks.microbuilder.core.UriTemplate.SimpleStringExpansion, null)
                                     });
 // TODO:
                                   default:
@@ -270,7 +270,7 @@ class RouteConfigurationFactory {
                         } else {
                           function generatedVariableFieldName(varnameAst:Varname):String return {
                             var buffer = new StringBuffer();
-                            UriTemplateFormatter.format_com_thoughtworks_restRpc_core_Varname(buffer, varnameAst);
+                            UriTemplateFormatter.format_com_thoughtworks_microbuilder_core_Varname(buffer, varnameAst);
                             var varname = buffer.toString();
                             var variablePath = varname.split(".");
                             generatedFieldName(variablePath);
@@ -462,7 +462,7 @@ class RouteConfigurationFactory {
                       keyValues.push(
                         macro $v{fieldName} =>
                         (
-                          new com.thoughtworks.restRpc.core.GeneratedRouteConfiguration.GeneratedUriTemplate(
+                          new com.thoughtworks.microbuilder.core.GeneratedRouteConfiguration.GeneratedUriTemplate(
                             $v{httpMethod},
                             function(__parameterIterators:Iterator<com.qifun.jsonStream.JsonStream>):String return {
                               var __uriParameters = new $uriParametersTypePath();
@@ -471,7 +471,7 @@ class RouteConfigurationFactory {
                               $formatterExpr.$generatingFormatMethodName(__buffer, __uriParameters);
                               __buffer.toString();
                             }
-                          ) : com.thoughtworks.restRpc.core.IRouteConfiguration.IUriTemplate
+                          ) : com.thoughtworks.microbuilder.core.IRouteConfiguration.IUriTemplate
                         )
                       );
                     }
@@ -486,7 +486,7 @@ class RouteConfigurationFactory {
               }
             }
             var mapExpr = if (keyValues.length == 0) {
-              macro new haxe.ds.StringMap<com.thoughtworks.restRpc.core.IRouteConfiguration.IUriTemplate>();
+              macro new haxe.ds.StringMap<com.thoughtworks.microbuilder.core.IRouteConfiguration.IUriTemplate>();
             } else {
               macro [ $a{keyValues} ];
             }
@@ -496,10 +496,10 @@ class RouteConfigurationFactory {
               pos: PositionTools.here(),
               kind : FFun({
                 args: [],
-                ret: macro : com.thoughtworks.restRpc.core.IRouteConfiguration,
-                expr: macro return new com.thoughtworks.restRpc.core.GeneratedRouteConfiguration(
+                ret: macro : com.thoughtworks.microbuilder.core.IRouteConfiguration,
+                expr: macro return new com.thoughtworks.microbuilder.core.GeneratedRouteConfiguration(
                   $mapExpr,
-                  com.thoughtworks.restRpc.core.GeneratedRouteConfiguration.getTypeName($structuralFailureExpr))
+                  com.thoughtworks.microbuilder.core.GeneratedRouteConfiguration.getTypeName($structuralFailureExpr))
               })
             });
           }
