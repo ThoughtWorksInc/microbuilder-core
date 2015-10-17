@@ -18,7 +18,7 @@ enablePlugins(HaxeJsPlugin)
 
 organization := "com.thoughtworks"
 
-name := "rest-rpc-core"
+name := "microbuilder-core"
 
 libraryDependencies ++= Seq("com.qifun.sbt-haxe" %% "test-interface" % "0.1.1" % Test)
 
