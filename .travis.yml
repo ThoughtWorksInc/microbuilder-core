@@ -7,6 +7,7 @@ before_install:
   - travis_retry sudo apt-get update
   - travis_retry sudo apt-get install sbt
   - travis_retry haxelib install hxjava
+  - travis_retry haxelib install hxparse
 script:
   - sbt test
 
