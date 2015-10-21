@@ -7,7 +7,7 @@ import haxe.macro.ExprTools;
 import com.dongxiguo.autoParser.StringSource;
 import haxe.unit.TestCase;
 import haxe.ds.Vector;
-import com.qifun.jsonStream.testUtil.JsonTestCase;
+import jsonStream.testUtil.JsonTestCase;
 using Lambda;
 
 class UriTemplateParserTest extends JsonTestCase {
