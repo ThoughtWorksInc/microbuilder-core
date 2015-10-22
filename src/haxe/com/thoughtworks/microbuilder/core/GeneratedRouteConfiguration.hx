@@ -3,6 +3,7 @@ package com.thoughtworks.microbuilder.core;
 import com.thoughtworks.microbuilder.core.IRouteConfiguration;
 import com.qifun.jsonStream.JsonStream;
 import haxe.ds.StringMap;
+import haxe.ds.Vector;
 
 @:final
 @:dox(hidden)
@@ -23,7 +24,9 @@ class GeneratedRouteConfiguration implements IRouteConfiguration {
   public var failureClassName(get, never):String;
 
   public function get_failureClassName():String return _failureClassName;
-
+  public function matchUri(method:String, uri:String, bodyJsonStream:JsonStream, contentType:String):JsonStream return{
+    throw "Unimplemented";
+  }
   public static inline function getTypeName(?classType:Class<Dynamic>, ?enumType:Enum<Dynamic>):String return {
     if (classType != null) {
       Type.getClassName(classType);
@@ -54,6 +57,15 @@ class GeneratedUriTemplate implements IUriTemplate {
 
   public function render(parameters:Iterator<JsonStream>):String return {
     renderFunction(parameters);
+  }
+
+
+  public function parseUri(uri: String): Vector<JsonStream> return{
+    throw "not implemented";
+  }
+
+  public function get_requestContentType(): String return{
+    throw "not implemented";
   }
 
 }
