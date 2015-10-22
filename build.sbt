@@ -1,22 +1,6 @@
-enablePlugins(HaxeJavaPlugin)
+enablePlugins(AllHaxePlugins)
 
-enablePlugins(HaxeCSharpPlugin)
-
-enablePlugins(HaxeCppPlugin)
-
-enablePlugins(HaxeFlashPlugin)
-
-enablePlugins(HaxeAs3Plugin)
-
-enablePlugins(HaxePythonPlugin)
-
-enablePlugins(HaxeNekoPlugin)
-
-enablePlugins(HaxePhpPlugin)
-
-enablePlugins(HaxeJsPlugin)
-
-organization := "com.thoughtworks"
+organization := "com.thoughtworks.microbuilder"
 
 name := "microbuilder-core"
 
@@ -49,6 +33,15 @@ for (c <- AllTestTargetConfigurations) yield {
   haxeMacros in c += """com.dongxiguo.autoParser.AutoFormatter.BUILDER.defineMacroClass([ "com.thoughtworks.microbuilder.core.UriTemplate" ], "com.thoughtworks.microbuilder.core.UriTemplateFormatter")"""
 }
 
-for (c <- Seq(CSharp, TestCSharp)) yield {
-  haxeOptions in c ++= Seq("-lib", "HUGS")
+
+val haxelibs = Map(
+  "continuation" -> DependencyVersion.SpecificVersion("1.3.2"),
+  "microbuilder-HUGS" -> DependencyVersion.SpecificVersion("2.0.0"),
+  "json-stream" -> DependencyVersion.SpecificVersion("2.0.0")
+)
+
+haxelibDependencies ++= haxelibs
+
+for (c <- AllTargetConfigurations ++ AllTestTargetConfigurations) yield {
+  haxeOptions in c ++= haxelibOptions(haxelibs)
 }
