@@ -1,6 +1,6 @@
 package com.thoughtworks.microbuilder.core;
 
-import com.qifun.jsonStream.rpc.Future;
+import jsonStream.rpc.Future;
 
 class MyStructureFailure {}
 

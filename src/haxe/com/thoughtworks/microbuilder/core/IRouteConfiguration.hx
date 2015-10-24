@@ -1,6 +1,6 @@
 package com.thoughtworks.microbuilder.core;
 
-import com.qifun.jsonStream.JsonStream;
+import jsonStream.JsonStream;
 import haxe.ds.Vector;
 
 interface IRouteConfiguration {

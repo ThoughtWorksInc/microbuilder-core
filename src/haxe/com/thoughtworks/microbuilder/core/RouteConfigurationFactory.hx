@@ -3,15 +3,15 @@ import haxe.macro.Printer;
 import haxe.ds.IntMap;
 import haxe.ds.StringMap;
 import com.thoughtworks.microbuilder.core.UriTemplate;
-import com.dongxiguo.autoParser.StringBuffer;
+import autoParser.StringBuffer;
 import haxe.macro.PositionTools;
 import haxe.macro.MacroStringTools;
 import haxe.macro.Context;
 import haxe.macro.Type;
 import haxe.macro.Expr;
-import com.dongxiguo.autoParser.AutoFormatter;
-import com.dongxiguo.autoParser.AutoParser;
-import com.dongxiguo.autoParser.StringSource;
+import autoParser.AutoFormatter;
+import autoParser.AutoParser;
+import autoParser.StringSource;
 import hamu.Naming.*;
 import hamu.ExprEvaluator;
 
@@ -266,7 +266,7 @@ class RouteConfigurationFactory {
                       }
                       function fillFromJsonStream(variableNode:Null<VariableNode>, jsonStream:Expr):Expr return {
                         if (variableNode == null) {
-                          macro com.qifun.jsonStream.JsonDeserializer.JsonDeserializerRuntime.skip($jsonStream);
+                          macro jsonStream.JsonDeserializer.JsonDeserializerRuntime.skip($jsonStream);
                         } else {
                           function generatedVariableFieldName(varnameAst:Varname):String return {
                             var buffer = new StringBuffer();
@@ -464,10 +464,10 @@ class RouteConfigurationFactory {
                         (
                           new com.thoughtworks.microbuilder.core.GeneratedRouteConfiguration.GeneratedUriTemplate(
                             $v{httpMethod},
-                            function(__parameterIterators:Iterator<com.qifun.jsonStream.JsonStream>):String return {
+                            function(__parameterIterators:Iterator<jsonStream.JsonStream>):String return {
                               var __uriParameters = new $uriParametersTypePath();
                               {$a{fillingExprs}}
-                              var __buffer = new com.dongxiguo.autoParser.StringBuffer();
+                              var __buffer = new autoParser.StringBuffer();
                               $formatterExpr.$generatingFormatMethodName(__buffer, __uriParameters);
                               __buffer.toString();
                             }

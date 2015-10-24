@@ -4,7 +4,7 @@ import com.thoughtworks.microbuilder.core.UriTemplate;
 import haxe.macro.Context;
 import haxe.macro.Expr;
 import haxe.macro.ExprTools;
-import com.dongxiguo.autoParser.StringSource;
+import autoParser.StringSource;
 import haxe.unit.TestCase;
 import haxe.ds.Vector;
 import jsonStream.testUtil.JsonTestCase;

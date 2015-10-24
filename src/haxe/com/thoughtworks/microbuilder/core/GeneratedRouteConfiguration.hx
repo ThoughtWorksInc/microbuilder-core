@@ -1,7 +1,7 @@
 package com.thoughtworks.microbuilder.core;
 
 import com.thoughtworks.microbuilder.core.IRouteConfiguration;
-import com.qifun.jsonStream.JsonStream;
+import jsonStream.JsonStream;
 import haxe.ds.StringMap;
 import haxe.ds.Vector;
 
