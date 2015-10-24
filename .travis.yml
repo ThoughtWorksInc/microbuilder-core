@@ -1,18 +1,49 @@
-language: haxe
-haxe:
-  - "3.2.0"
+sudo: false
+
+cache:
+  directories:
+    - $HOME/.ivy2/cache
+    - $HOME/.sbt/boot/
+
+language: scala
+
+addons:
+  apt:
+    packages:
+    - mono-devel
+    - libgc1c2
+
 before_install:
-  - travis_retry wget http://dl.bintray.com/sbt/debian/sbt-0.13.5.deb
-  - travis_retry sudo dpkg -i sbt-0.13.5.deb
-  - travis_retry sudo apt-get update
-  - travis_retry sudo apt-get install sbt
-  - travis_retry haxelib install hxjava
-  - travis_retry haxelib install hxparse
+ - travis_retry wget http://nekovm.org/media/neko-2.0.0-linux64.tar.gz
+ - tar zxvf neko-2.0.0-linux64.tar.gz
+ - travis_retry wget http://hxbuilds.s3-website-us-east-1.amazonaws.com/builds/haxe/linux64/"$HAXE_FILE"
+ - tar zxvf "$HAXE_FILE"
+ - mv haxe-*/ haxe/
+ - export PATH=$PATH:$PWD/haxe:$PWD/neko-2.0.0-linux
+ - export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$PWD/neko-2.0.0-linux
+ - export HAXE_STD_PATH=$PWD/haxe/std
+ - haxelib setup .haxelib-local
+ - if [[ "$HAXE_TARGET" = "java" ]]; then travis_retry haxelib install hxjava --always; fi
+ - if [[ "$HAXE_TARGET" = "cs" ]]; then travis_retry haxelib install hxcs --always; fi
+
 script:
-  - sbt test
+  - sbt ";++$TRAVIS_SCALA_VERSION;haxelibInstallDependencies;$SBT_COMMAND"
+
+  # Tricks to avoid unnecessary cache updates
+  - find $HOME/.sbt -name "*.lock" | xargs rm
+  - find $HOME/.ivy2 -name "ivydata-*.properties" | xargs rm
+
+jdk:
+  - oraclejdk8
+  - openjdk7
+
+env:
+  matrix:
+    # Haxe 3.2.1
+    - SBT_COMMAND=test HAXE_TARGET=java HAXE_FILE=haxe_2015-10-12_master_deab442.tar.gz
+    - SBT_COMMAND=test-csharp:run HAXE_TARGET=cs HAXE_FILE=haxe_2015-10-12_master_deab442.tar.gz
 
 notifications:
-  email: false
   webhooks:
     urls:
       - https://webhooks.gitter.im/e/0e11823ea12783811cd8
