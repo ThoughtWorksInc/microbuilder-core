@@ -4,6 +4,22 @@ organization := "com.thoughtworks.microbuilder"
 
 name := "microbuilder-core"
 
+haxelibReleaseNote := "Initial release"
+
+haxelibTags ++= Seq(
+  "cross", "cpp", "cs", "flash", "java", "javascript", "js", "neko", "php", "python", "nme",
+  "macro", "utility"
+)
+
+developers := List(
+  Developer(
+    "Atry",
+    "杨博 (Yang Bo)",
+    "pop.atry@gmail.com",
+    url("https://github.com/Atry")
+  )
+)
+
 libraryDependencies ++= Seq("com.qifun.sbt-haxe" %% "test-interface" % "0.1.1" % Test)
 
 for (c <- AllHaxeConfigurations) yield {
@@ -56,3 +72,36 @@ haxelibDependencies ++= haxelibs
 for (c <- AllTargetConfigurations ++ AllTestTargetConfigurations) yield {
   haxeOptions in c ++= haxelibOptions(haxelibs)
 }
+
+homepage := Some(url(s"https://github.com/ThoughtWorksInc/${name.value}"))
+
+startYear := Some(2015)
+
+releasePublishArtifactsAction := PgpKeys.publishSigned.value
+
+import ReleaseTransformations._
+
+releaseProcess := Seq[ReleaseStep](
+  checkSnapshotDependencies,
+  inquireVersions,
+  runClean,
+  runTest,
+  setReleaseVersion,
+  commitReleaseVersion,
+  tagRelease,
+  releaseStepTask(publish in Haxe),
+  publishArtifacts,
+  setNextVersion,
+  commitNextVersion,
+  releaseStepCommand("sonatypeRelease"),
+  pushChanges
+)
+
+releaseUseGlobalVersion := false
+
+scmInfo := Some(ScmInfo(
+  url(s"https://github.com/ThoughtWorksInc/${name.value}"),
+  s"scm:git:git://github.com/ThoughtWorksInc/${name.value}.git",
+  Some(s"scm:git:git@github.com:ThoughtWorksInc/${name.value}.git")))
+
+licenses += "Apache" -> url("http://www.apache.org/licenses/LICENSE-2.0")
