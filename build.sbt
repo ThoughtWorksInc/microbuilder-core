@@ -1,3 +1,5 @@
+import scala.util.parsing.json.JSONFormat
+
 enablePlugins(AllHaxePlugins)
 
 organization := "com.thoughtworks.microbuilder"
@@ -44,22 +46,23 @@ for (c <- AllTargetConfigurations ++ AllTestTargetConfigurations) yield {
   haxeOptions in c += (baseDirectory.value / "build.hxml").getAbsolutePath
 }
 
-for (c <- AllTargetConfigurations) yield {
+for (c <- AllTestTargetConfigurations) yield {
   haxeMacros in c += """autoParser.AutoParser.BUILDER.defineClass([ "com.thoughtworks.microbuilder.core.UriTemplate" ], "com.thoughtworks.microbuilder.core.UriTemplateParser")"""
 }
 
-for (c <- AllTargetConfigurations) yield {
+for (c <- AllTestTargetConfigurations) yield {
   haxeMacros in c += """autoParser.AutoFormatter.BUILDER.defineClass([ "com.thoughtworks.microbuilder.core.UriTemplate" ], "com.thoughtworks.microbuilder.core.UriTemplateFormatter")"""
 }
 
+haxeExtraParams +=
+  raw"""--macro hamu.ExprEvaluator.parseAndEvaluate("${
+    JSONFormat.quoteString( """autoParser.AutoFormatter.BUILDER.defineMacroClass([ "com.thoughtworks.microbuilder.core.UriTemplate" ], "com.thoughtworks.microbuilder.core.UriTemplateFormatter")""")
+  }")"""
 
-for (c <- AllTestTargetConfigurations) yield {
-  haxeMacros in c += """autoParser.AutoParser.BUILDER.defineMacroClass([ "com.thoughtworks.microbuilder.core.UriTemplate" ], "com.thoughtworks.microbuilder.core.UriTemplateParser")"""
-}
-
-for (c <- AllTestTargetConfigurations) yield {
-  haxeMacros in c += """autoParser.AutoFormatter.BUILDER.defineMacroClass([ "com.thoughtworks.microbuilder.core.UriTemplate" ], "com.thoughtworks.microbuilder.core.UriTemplateFormatter")"""
-}
+haxeExtraParams +=
+  raw"""--macro hamu.ExprEvaluator.parseAndEvaluate("${
+    JSONFormat.quoteString( """autoParser.AutoParser.BUILDER.defineMacroClass([ "com.thoughtworks.microbuilder.core.UriTemplate" ], "com.thoughtworks.microbuilder.core.UriTemplateParser")""")
+  }")"""
 
 
 val haxelibs = Map(
