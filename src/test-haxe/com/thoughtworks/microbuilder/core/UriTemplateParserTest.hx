@@ -4,6 +4,7 @@ import com.thoughtworks.microbuilder.core.UriTemplate;
 import haxe.macro.Context;
 import haxe.macro.Expr;
 import haxe.macro.ExprTools;
+import autoParser.StringBuffer;
 import autoParser.StringSource;
 import haxe.unit.TestCase;
 import haxe.ds.Vector;
@@ -33,6 +34,10 @@ class UriTemplateParserTest extends JsonTestCase {
         LITERALS(UNRESERVED(122))
       ], template
     );
+    var buffer = new StringBuffer();
+    UriTemplateFormatter.format_com_thoughtworks_microbuilder_core_UriTemplate(buffer, template);
+    var rebuiltData = buffer.toString();
+    assertEquals(data, rebuiltData);
   }
 
   public function test2() {
@@ -56,6 +61,10 @@ class UriTemplateParserTest extends JsonTestCase {
       ],
       template
     );
+    var buffer = new StringBuffer();
+    UriTemplateFormatter.format_com_thoughtworks_microbuilder_core_UriTemplate(buffer, template);
+    var rebuiltData = buffer.toString();
+    assertEquals("xxx{yy}", rebuiltData);
   }
 
   public function test3() {
@@ -79,6 +88,10 @@ class UriTemplateParserTest extends JsonTestCase {
       ],
       template
     );
+    var buffer = new StringBuffer();
+    UriTemplateFormatter.format_com_thoughtworks_microbuilder_core_UriTemplate(buffer, template);
+    var rebuiltData = buffer.toString();
+    assertEquals("xxx{/yy}", rebuiltData);
   }
 
 
@@ -104,6 +117,10 @@ class UriTemplateParserTest extends JsonTestCase {
       ],
       template
     );
+    var buffer = new StringBuffer();
+    UriTemplateFormatter.format_com_thoughtworks_microbuilder_core_UriTemplate(buffer, template);
+    var rebuiltData = buffer.toString();
+    assertEquals(data, rebuiltData);
   }
 
   public function test5() {
@@ -140,6 +157,10 @@ class UriTemplateParserTest extends JsonTestCase {
       ,
       template
     );
+    var buffer = new StringBuffer();
+    UriTemplateFormatter.format_com_thoughtworks_microbuilder_core_UriTemplate(buffer, template);
+    var rebuiltData = buffer.toString();
+    assertEquals(data, rebuiltData);
   }
 
 }
