@@ -27,8 +27,11 @@ before_install:
  - if [[ "$HAXE_TARGET" = "java" ]]; then travis_retry haxelib install hxjava --always; fi
  - if [[ "$HAXE_TARGET" = "cs" ]]; then travis_retry haxelib install hxcs --always; fi
 
+install:
+  - sbt ";++$TRAVIS_SCALA_VERSION;haxelibInstallDependencies;update"
+
 script:
-  - sbt ";++$TRAVIS_SCALA_VERSION;haxelibInstallDependencies;$SBT_COMMAND"
+  - sbt ";++$TRAVIS_SCALA_VERSION;$SBT_COMMAND"
 
   # Tricks to avoid unnecessary cache updates
   - find $HOME/.sbt -name "*.lock" | xargs rm
