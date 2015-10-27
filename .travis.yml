@@ -31,11 +31,7 @@ install:
   - sbt ";++$TRAVIS_SCALA_VERSION;haxelibInstallDependencies;update"
 
 script:
-  - sbt ";++$TRAVIS_SCALA_VERSION;$SBT_COMMAND"
-
-  # Tricks to avoid unnecessary cache updates
-  - find $HOME/.sbt -name "*.lock" | xargs rm
-  - find $HOME/.ivy2 -name "ivydata-*.properties" | xargs rm
+  - sbt ";++$TRAVIS_SCALA_VERSION;$SBT_COMMAND" && (find $HOME/.sbt -name "*.lock" | xargs rm) && (find $HOME/.ivy2 -name "ivydata-*.properties" | xargs rm)
 
 jdk:
   - oraclejdk8
