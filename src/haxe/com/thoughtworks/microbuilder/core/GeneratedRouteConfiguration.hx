@@ -4,19 +4,22 @@ import com.thoughtworks.microbuilder.core.IRouteConfiguration;
 import jsonStream.JsonStream;
 import haxe.ds.StringMap;
 import haxe.ds.Vector;
+import com.dongxiguo.continuation.Continuation;
+import com.dongxiguo.continuation.utils.Generator;
 
 @:dox(hide)
 @:final
 class GeneratedRouteConfiguration implements IRouteConfiguration {
-  public function new(uriTemplateMap:StringMap<GeneratedRouteEntry>, failureClassName:String) {
-    this.uriTemplateMap = uriTemplateMap;
+
+  public function new(routeEntries:StringMap<GeneratedRouteEntry>, failureClassName:String) {
+    this.routeEntries = routeEntries;
     _failureClassName = failureClassName;
   }
 
-  var uriTemplateMap:StringMap<GeneratedRouteEntry>;
+  var routeEntries:StringMap<GeneratedRouteEntry>;
 
   public function nameToUriTemplate(name:String):Null<IRouteEntry> return {
-    uriTemplateMap.get(name);
+    routeEntries.get(name);
   }
 
   private var _failureClassName:String;
@@ -28,21 +31,52 @@ class GeneratedRouteConfiguration implements IRouteConfiguration {
   public static inline function getTypeName(?classType:Class<Dynamic>, ?enumType:Enum<Dynamic>):String return {
     if (classType != null) {
       Type.getClassName(classType);
-    } else if (enumType != null){
+    } else if (enumType != null) {
       Type.getEnumName(enumType);
     } else {
       null;
     }
   }
 
-  public function matchUri(method: String, uri: String, body: JsonStream, contentType: Null<String>):Null<JsonStream> return {
-    throw "TODO:";
+  public function matchUri(method:String, uri:String, body:Null<JsonStream>, requestContentType:Null<String>):Null<JsonStream> return {
+    for (entry in routeEntries) {
+      if (method == entry.method && requestContentType == entry.requestContentType) {
+        var matchedData = entry.parseUri(uri);
+        if (matchedData != null) {
+          return JsonStream.OBJECT(new Generator<JsonStreamPair>(Continuation.cpsFunction(
+            function(yield) {
+              @await yield(new JsonStreamPair(matchedData.methodName, JsonStream.ARRAY(new Generator<JsonStream>(Continuation.cpsFunction(
+                function(yield) {
+                  for (parameter in matchedData.parameters) {
+                    @await yield(parameter);
+                  }
+                  if (requestContentType != null) {
+                    @await yield(body);
+                  }
+                }
+              )))));
+            }
+          )));
+        }
+      }
+    }
+    null;
   }
+
+}
+
+@:dox(hide)
+@:final
+class UriData {
+  public var methodName:String;
+  public var parameters:Array<JsonStream>;
 }
 
 @:dox(hide)
 @:final
 class GeneratedRouteEntry implements IRouteEntry {
+
+  public var parseUri:String -> Null<UriData>;
 
   public var requestContentType(get, never):Null<String>;
 
@@ -50,10 +84,11 @@ class GeneratedRouteEntry implements IRouteEntry {
 
   private function get_requestContentType():Null<String> return _requestContentType;
 
-  public function new(method:String, renderFunction:Iterator<JsonStream> -> String, requestContentType:Null<String>) {
+  public function new(method:String, renderFunction:Iterator<JsonStream> -> String, requestContentType:Null<String>, parseUri:String -> Null<UriData>) {
     this._method = method;
     this.renderFunction = renderFunction;
     this._requestContentType = requestContentType;
+    this.parseUri = parseUri;
   }
 
   var _method:String;

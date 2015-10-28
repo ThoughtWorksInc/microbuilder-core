@@ -470,7 +470,10 @@ class RouteConfigurationFactory {
                             $formatterExpr.$generatingFormatMethodName(__buffer, __uriParameters);
                             __buffer.toString();
                           },
-                          $v{requestContentType}
+                          $v{requestContentType},
+                          function(uri:String):Null<com.thoughtworks.microbuilder.core.GeneratedRouteConfiguration.UriData> return {
+                            throw "TODO: Not implemented";
+                          }
                         )
                       );
                     }

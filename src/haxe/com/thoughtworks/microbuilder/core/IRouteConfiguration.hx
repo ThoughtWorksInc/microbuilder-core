@@ -29,7 +29,7 @@ interface IRouteConfiguration {
    *
    * Returns null if no RPC method matched.
    **/
-  public function matchUri(method: String, uri: String, body: JsonStream, contentType: Null<String>):Null<JsonStream>;
+  public function matchUri(method: String, uri: String, body: Null<JsonStream>, contentType: Null<String>):Null<JsonStream>;
 }
 
 /**
