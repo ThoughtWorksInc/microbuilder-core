@@ -5,8 +5,8 @@ import jsonStream.JsonStream;
 import haxe.ds.StringMap;
 import haxe.ds.Vector;
 
+@:dox(hide)
 @:final
-@:dox(hidden)
 class GeneratedRouteConfiguration implements IRouteConfiguration {
   public function new(uriTemplateMap:StringMap<IUriTemplate>, failureClassName:String) {
     this.uriTemplateMap = uriTemplateMap;
@@ -40,6 +40,7 @@ class GeneratedRouteConfiguration implements IRouteConfiguration {
   }
 }
 
+@:dox(hide)
 @:final
 class GeneratedUriTemplate implements IUriTemplate {
 
