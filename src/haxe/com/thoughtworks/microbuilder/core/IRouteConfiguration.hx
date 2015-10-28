@@ -1,7 +1,6 @@
 package com.thoughtworks.microbuilder.core;
 
 import jsonStream.JsonStream;
-import haxe.ds.Vector;
 
 interface IRouteConfiguration {
 
@@ -11,7 +10,6 @@ interface IRouteConfiguration {
 
   private function get_failureClassName():String;
 
-  public function matchUri(method:String, uri:String, bodyJsonStream:JsonStream, contentType:String): JsonStream;
 }
 
 /**
@@ -29,7 +27,4 @@ interface IUriTemplate {
    */
   public function render(parameters:Iterator<JsonStream>):String;
 
-  public function parseUri(uri: String): Vector<JsonStream>;
-
-  public function get_requestContentType(): String;
 }
