@@ -11,7 +11,25 @@ interface IRouteConfiguration {
 
   private function get_failureClassName():String;
 
-  public function matchUri(method: String, uri: String, body: JsonStream, contentType: Null<String>):JsonStream;
+  /**
+   * Returns a JsonStream that represents the RPC, for example:
+   *
+   * ```
+   * {
+   *   "methodName" :
+   *   [
+   *     "parameter1, a string",
+   *     [
+   *       "parameter2 is an array, and I am the first element in the array",
+   *       "the second element in the array"
+   *     ]
+   *   ]
+   * }
+   * ```
+   *
+   * Returns null if no RPC method matched.
+   **/
+  public function matchUri(method: String, uri: String, body: JsonStream, contentType: Null<String>):Null<JsonStream>;
 }
 
 /**
