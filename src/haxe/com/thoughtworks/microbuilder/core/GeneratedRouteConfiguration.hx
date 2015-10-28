@@ -35,7 +35,7 @@ class GeneratedRouteConfiguration implements IRouteConfiguration {
     }
   }
 
-  public function matchUri(method: String, uri: String, body: JsonStream, contentType: Null<String>) : Vector<JsonStream> return {
+  public function matchUri(method: String, uri: String, body: JsonStream, contentType: Null<String>):JsonStream return {
     throw "TODO:";
   }
 }

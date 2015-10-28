@@ -11,7 +11,7 @@ interface IRouteConfiguration {
 
   private function get_failureClassName():String;
 
-  public function matchUri(method: String, uri: String, body: JsonStream, contentType: Null<String>) : Vector<JsonStream>;
+  public function matchUri(method: String, uri: String, body: JsonStream, contentType: Null<String>):JsonStream;
 }
 
 /**
