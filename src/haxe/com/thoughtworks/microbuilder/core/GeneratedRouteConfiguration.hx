@@ -3,6 +3,7 @@ package com.thoughtworks.microbuilder.core;
 import com.thoughtworks.microbuilder.core.IRouteConfiguration;
 import jsonStream.JsonStream;
 import haxe.ds.StringMap;
+import haxe.ds.Vector;
 
 @:final
 @:dox(hidden)
@@ -34,10 +35,23 @@ class GeneratedRouteConfiguration implements IRouteConfiguration {
     }
   }
 
+  public function matchUri(method: String, uri: String, body: JsonStream, contentType: Null<String>) : Vector<JsonStream> return {
+    throw "TODO:";
+  }
 }
 
 @:final
 class GeneratedUriTemplate implements IUriTemplate {
+
+  public var requestContentType(get, never):Null<String>;
+
+  private function get_requestContentType():Null<String> return {
+    throw "TODO";
+  }
+
+  public function parseUri(uri:String):Null<Vector<JsonStream>> return {
+    throw "TODO";
+  }
 
   public function new(method:String, renderFunction:Iterator<JsonStream> -> String) {
     this._method = method;
