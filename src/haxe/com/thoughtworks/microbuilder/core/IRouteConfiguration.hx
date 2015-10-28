@@ -5,7 +5,7 @@ import haxe.ds.Vector;
 
 interface IRouteConfiguration {
 
-  public function nameToUriTemplate(name:String):Null<IUriTemplate>;
+  public function nameToUriTemplate(name:String):Null<IRouteEntry>;
 
   public var failureClassName(get, never):String;
 
@@ -36,7 +36,7 @@ interface IRouteConfiguration {
  *
  */
 @:nativeGen
-interface IUriTemplate {
+interface IRouteEntry {
 
   public var method(get, never):String;
 

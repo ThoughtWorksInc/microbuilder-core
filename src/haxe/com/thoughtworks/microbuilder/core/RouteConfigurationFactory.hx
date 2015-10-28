@@ -461,7 +461,7 @@ class RouteConfigurationFactory {
 //                      trace(new Printer().printExpr(macro {$a{fillingExprs}}));
                       keyValues.push(
                         macro $v{fieldName} =>
-                        new com.thoughtworks.microbuilder.core.GeneratedRouteConfiguration.GeneratedUriTemplate(
+                        new com.thoughtworks.microbuilder.core.GeneratedRouteConfiguration.GeneratedRouteEntry(
                           $v{httpMethod},
                           function(__parameterIterators:Iterator<jsonStream.JsonStream>):String return {
                             var __uriParameters = new $uriParametersTypePath();
@@ -485,7 +485,7 @@ class RouteConfigurationFactory {
               }
             }
             var mapExpr = if (keyValues.length == 0) {
-              macro new haxe.ds.StringMap<com.thoughtworks.microbuilder.core.GeneratedRouteConfiguration.GeneratedUriTemplate>();
+              macro new haxe.ds.StringMap<com.thoughtworks.microbuilder.core.GeneratedRouteConfiguration.GeneratedRouteEntry>();
             } else {
               macro [ $a{keyValues} ];
             }
