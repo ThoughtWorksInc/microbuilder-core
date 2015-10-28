@@ -461,18 +461,16 @@ class RouteConfigurationFactory {
 //                      trace(new Printer().printExpr(macro {$a{fillingExprs}}));
                       keyValues.push(
                         macro $v{fieldName} =>
-                        (
-                          new com.thoughtworks.microbuilder.core.GeneratedRouteConfiguration.GeneratedUriTemplate(
-                            $v{httpMethod},
-                            function(__parameterIterators:Iterator<jsonStream.JsonStream>):String return {
-                              var __uriParameters = new $uriParametersTypePath();
-                              {$a{fillingExprs}}
-                              var __buffer = new autoParser.StringBuffer();
-                              $formatterExpr.$generatingFormatMethodName(__buffer, __uriParameters);
-                              __buffer.toString();
-                            },
-                            $v{requestContentType}
-                          ) : com.thoughtworks.microbuilder.core.IRouteConfiguration.IUriTemplate
+                        new com.thoughtworks.microbuilder.core.GeneratedRouteConfiguration.GeneratedUriTemplate(
+                          $v{httpMethod},
+                          function(__parameterIterators:Iterator<jsonStream.JsonStream>):String return {
+                            var __uriParameters = new $uriParametersTypePath();
+                            {$a{fillingExprs}}
+                            var __buffer = new autoParser.StringBuffer();
+                            $formatterExpr.$generatingFormatMethodName(__buffer, __uriParameters);
+                            __buffer.toString();
+                          },
+                          $v{requestContentType}
                         )
                       );
                     }
@@ -487,7 +485,7 @@ class RouteConfigurationFactory {
               }
             }
             var mapExpr = if (keyValues.length == 0) {
-              macro new haxe.ds.StringMap<com.thoughtworks.microbuilder.core.IRouteConfiguration.IUriTemplate>();
+              macro new haxe.ds.StringMap<com.thoughtworks.microbuilder.core.GeneratedRouteConfiguration.GeneratedUriTemplate>();
             } else {
               macro [ $a{keyValues} ];
             }

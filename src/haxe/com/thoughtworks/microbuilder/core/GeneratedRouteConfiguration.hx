@@ -8,12 +8,12 @@ import haxe.ds.Vector;
 @:dox(hide)
 @:final
 class GeneratedRouteConfiguration implements IRouteConfiguration {
-  public function new(uriTemplateMap:StringMap<IUriTemplate>, failureClassName:String) {
+  public function new(uriTemplateMap:StringMap<GeneratedUriTemplate>, failureClassName:String) {
     this.uriTemplateMap = uriTemplateMap;
     _failureClassName = failureClassName;
   }
 
-  var uriTemplateMap:StringMap<IUriTemplate>;
+  var uriTemplateMap:StringMap<GeneratedUriTemplate>;
 
   public function nameToUriTemplate(name:String):Null<IUriTemplate> return {
     uriTemplateMap.get(name);
@@ -35,7 +35,7 @@ class GeneratedRouteConfiguration implements IRouteConfiguration {
     }
   }
 
-  public function matchUri(method: String, uri: String, body: JsonStream, contentType: Null<String>):JsonStream return {
+  public function matchUri(method: String, uri: String, body: JsonStream, contentType: Null<String>):Null<JsonStream> return {
     throw "TODO:";
   }
 }
