@@ -45,17 +45,14 @@ class GeneratedUriTemplate implements IUriTemplate {
 
   public var requestContentType(get, never):Null<String>;
 
-  private function get_requestContentType():Null<String> return {
-    throw "TODO";
-  }
+  private var _requestContentType:Null<String>;
 
-  public function parseUri(uri:String):Null<Vector<JsonStream>> return {
-    throw "TODO";
-  }
+  private function get_requestContentType():Null<String> return _requestContentType;
 
-  public function new(method:String, renderFunction:Iterator<JsonStream> -> String) {
+  public function new(method:String, renderFunction:Iterator<JsonStream> -> String, requestContentType:Null<String>) {
     this._method = method;
     this.renderFunction = renderFunction;
+    this._requestContentType = requestContentType;
   }
 
   var _method:String;

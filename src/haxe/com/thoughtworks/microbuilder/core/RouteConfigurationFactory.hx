@@ -127,13 +127,13 @@ class RouteConfigurationFactory {
                         ]
                       }
                     ]: {
-                      var contentType = switch field.meta.extract(":contentType") {
+                      var requestContentType = switch field.meta.extract(":requestContentType") {
                         case []:
                           null;
                         case [ { params: [ (ExprEvaluator.evaluate(_):String) => contentType ] } ]:
                           contentType;
                         case entries:
-                          throw Context.error("Expect @:contentType(\"some/mime.type\")", entries[0].pos);
+                          throw Context.error("Expect @:requestContentType(\"some/mime.type\")", entries[0].pos);
                       }
                       var source = new StringSource(uriTemplateText);
                       var variableMap = new VariableMap();
@@ -259,7 +259,7 @@ class RouteConfigurationFactory {
                         default:
                           throw "Expect function";
                       }
-                      var numberOfUriParameters = if (contentType == null) {
+                      var numberOfUriParameters = if (requestContentType == null) {
                         args.length;
                       } else {
                         args.length - 1;
@@ -470,7 +470,8 @@ class RouteConfigurationFactory {
                               var __buffer = new autoParser.StringBuffer();
                               $formatterExpr.$generatingFormatMethodName(__buffer, __uriParameters);
                               __buffer.toString();
-                            }
+                            },
+                            $v{requestContentType}
                           ) : com.thoughtworks.microbuilder.core.IRouteConfiguration.IUriTemplate
                         )
                       );

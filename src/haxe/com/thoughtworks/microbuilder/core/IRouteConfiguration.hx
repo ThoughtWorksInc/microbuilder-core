@@ -29,10 +29,8 @@ interface IUriTemplate {
    */
   public function render(parameters:Iterator<JsonStream>):String;
 
-    public function parseUri(uri:String):Null<Vector<JsonStream>>;
+  public var requestContentType(get, never):Null<String>;
 
-    public var requestContentType(get, never):Null<String>;
-
-    private function get_requestContentType():Null<String>;
+  private function get_requestContentType():Null<String>;
 
 }
