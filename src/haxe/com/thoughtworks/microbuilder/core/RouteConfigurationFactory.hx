@@ -1,4 +1,6 @@
 package com.thoughtworks.microbuilder.core;
+
+import haxe.ds.Option;
 import haxe.macro.Printer;
 import haxe.ds.IntMap;
 import haxe.ds.StringMap;
@@ -80,6 +82,7 @@ class RouteConfigurationFactory {
 #if macro
 
   static function fields(includeModules:Array<String>, factoryModule:String, className:String):Array<Field> return {
+    var seed = 0;
     var parserModule = '${factoryModule}_UriParametersParser';
     var parserExpr = MacroStringTools.toFieldExpr(parserModule.split("."));
     var formatterModule = '${factoryModule}_UriParametersFormatter';
@@ -194,14 +197,17 @@ class RouteConfigurationFactory {
                                     var varspec = variableList.first;
 
                                     if (varspec.modifierLevel4 != null) {
-// TODO: Level 4
+                                      // TODO: Level 4
                                       throw "Level 1-3 templates does not support modifiers.";
                                     }
                                     var buffer = new StringBuffer();
                                     UriTemplateFormatter.format_com_thoughtworks_microbuilder_core_Varname(buffer, varspec.varname);
                                     var varname = buffer.toString();
                                     var variablePath = varname.split(".");
-                                    var variableFieldName = generatedFieldName(variablePath);
+                                    var variablePlainName = '${generatedFieldName(variablePath)}_${seed++}';
+                                    var variableDeclaration = new VariableDeclaration();
+                                    variableDeclaration.plainName = variablePlainName;
+                                    variableDeclaration.modifierLevel4 = varspec.modifierLevel4;
                                     function insertToVariableMap(level:Int, map:VariableMap):Void {
                                       var element = variablePath[level];
                                       var nextLevel = level + 1;
@@ -216,17 +222,17 @@ class RouteConfigurationFactory {
                                       if (nextLevel < variablePath.length) {
                                         insertToVariableMap(nextLevel, node.submap);
                                       } else {
-                                        node.values.push(varspec);
+                                        node.values.push(variableDeclaration);
                                       }
                                     }
                                     insertToVariableMap(0, variableMap);
                                     uriParameterFields.push({
                                       access: [ APublic ],
-                                      name: variableFieldName,
+                                      name: variablePlainName,
                                       pos: PositionTools.here(),
                                       kind: FVar(macro : com.thoughtworks.microbuilder.core.UriTemplate.SimpleStringExpansion, null)
                                     });
-// TODO:
+                                    // TODO:
                                   default:
                                     // TODO: Level 3-4
                                     throw "Level 1-2 templates are limited to a single varspec per expression.";
@@ -248,6 +254,7 @@ class RouteConfigurationFactory {
                       uriParametersDefinitions.push(uriParameterDefinition);
                       //trace(new haxe.macro.Printer().printTypeDefinition(uriParameterDefinition));
                       var generatingFormatMethodName = formatMethodName(generatingPack, uriParameterName);
+                      var generatingParseMethodName = parseMethodName(generatingPack, uriParameterName);
                       var uriParametersTypePath = {
                         pack: generatingPack,
                         name: uriTemplatesModuleName,
@@ -264,7 +271,7 @@ class RouteConfigurationFactory {
                       } else {
                         args.length - 1;
                       }
-                      function fillFromJsonStream(variableNode:Null<VariableNode>, jsonStream:Expr):Expr return {
+                      function fillFromJsonStream(variableNode:Null<VariableNode>, uriParametersExpr:Expr, jsonStream:Expr):Expr return {
                         if (variableNode == null) {
                           macro jsonStream.JsonDeserializer.JsonDeserializerRuntime.skip($jsonStream);
                         } else {
@@ -281,8 +288,8 @@ class RouteConfigurationFactory {
                                 if (varspec.modifierLevel4 != null) {
                                   throw "Level 1-3 templates do not support modifiers.";
                                 } else {
-                                  var variableFieldName = generatedVariableFieldName(varspec.varname);
-                                  macro __uriParameters.$variableFieldName = null;
+                                  var variablePlainName = varspec.plainName;
+                                  macro $uriParametersExpr.$variablePlainName = null;
                                 }
                               }
                             ];
@@ -296,8 +303,8 @@ class RouteConfigurationFactory {
                                 if (varspec.modifierLevel4 != null) {
                                   throw "Level 1-3 templates do not support modifiers.";
                                 } else {
-                                  var variableFieldName = generatedVariableFieldName(varspec.varname);
-                                  macro __uriParameters.$variableFieldName = __stringValue;
+                                  var variablePlainName = varspec.plainName;
+                                  macro $uriParametersExpr.$variablePlainName = __stringValue;
                                 }
                               }
                             ];
@@ -378,11 +385,6 @@ class RouteConfigurationFactory {
                           } else {
                             macro throw "Expect OBJECT"; // TODO: Exception definition.
                           }
-                          var optionalCommaSeparatedResult = if (variableNode.values.length > 0) {
-                            macro var __commaSeparated = [];
-                          } else {
-                            macro null;
-                          }
                           var optionalCommaSeparatedDefinition = if (variableNode.values.length > 0) {
                             macro var __commaSeparated = [];
                           } else {
@@ -394,8 +396,8 @@ class RouteConfigurationFactory {
                                 if (varspec.modifierLevel4 != null) {
                                   throw "Level 1-3 templates do not support modifiers.";
                                 } else {
-                                  var variableFieldName = generatedVariableFieldName(varspec.varname);
-                                  macro __uriParameters.$variableFieldName = __commaSeparated.join(",");
+                                  var variablePlainName = varspec.plainName;
+                                  macro $uriParametersExpr.$variablePlainName = __commaSeparated.join(",");
                                 }
                               }
                             ];
@@ -426,7 +428,7 @@ class RouteConfigurationFactory {
                                 } else {
                                   $optionalCommaSeparatedDefinition;
                                   for (__pair in __pairs) {
-                                    $fillPair;
+                                    $fillPair; // TODO: nested objects
                                   }
                                   $optionalCommaSeparatedResult;
                                 }
@@ -448,31 +450,422 @@ class RouteConfigurationFactory {
                           }
                         }
                       }
-                      var fillingExprs = [
+                      var fillingUriParameterExprs = [
                         for (i in 0...numberOfUriParameters) {
                           var arg = args[i];
-                          var fillingExpr = fillFromJsonStream(variableMap.get(arg.name), macro __jsonStream);
+                          var fillingExpr = fillFromJsonStream(variableMap.get(arg.name), macro __uriParameters, macro __jsonStream);
                           macro {
                             var __jsonStream = __parameterIterators.next();
                             $fillingExpr;
                           }
                         }
                       ];
-//                      trace(new Printer().printExpr(macro {$a{fillingExprs}}));
+//                      trace(new Printer().printExpr(macro {$a{fillingUriParameterExprs}}));
+                      function extractingToJsonStream(variableNode:Null<VariableNode>, uriParametersExpr:Expr, yieldExpr:Expr):ExprOf<jsonStream.JsonStream> return {
+                        if (variableNode == null) {
+                          macro null; // Skip parameters that does not appear in URI template
+                        } else {
+                          function extracting(currentNode:VariableNode):ExprOf<jsonStream.JsonStream> return {
+                            // 纯 varspec（有*） - 用* varspec 遍历，用* varspec 生成每一项，用其他 varspec 检查
+                            // submap + varspec（有*） - 声明__handledValues，用* varspec 遍历，用* varspec 生成每一项，用其他 varspec 和 submap 检查，保证submap用尽
+
+                            // submap + varspec（无限长度，无*） - 前置检查varspec，声明__handledValues，用无限长度的 varspec 遍历，用无限长度 varspec 生成每一项，用 submap 检查，保证submap用尽
+                            // submap + varspec（有限长度，无*） - 前置检查varspec，声明__handledValues，用最长的 varspec 遍历，用最长的 varspec 生成每一项，用 submap 检查，补加submap或者保证submap用尽
+
+                            // 纯 varspec（无*） - 生成字符串
+                            // 纯 submap - 直接遍历
+
+                            var handledValuesName = '__handledValues_${seed++}';
+                            var yieldPairName = '__yields_${seed++}';
+
+                            var nonExplodeVarspecOption = {
+                              var nonExplodeVarspecs = [
+                                for (varspec in currentNode.values) {
+                                  if (varspec.modifierLevel4 == null || varspec.modifierLevel4.match(PREFIX(_))) {
+                                    varspec;
+                                  }
+                                }
+                              ];
+                              if (nonExplodeVarspecs.empty()) {
+                                None;
+                              } else {
+                                nonExplodeVarspecs.sort(function(left:VariableDeclaration, right:VariableDeclaration) return {
+                                  function modifierPriority(modifier) return {
+                                    switch modifier {
+                                      case null: 0;
+                                      case PREFIX(limit): limit;
+                                      default: throw "Expect null or PREFIX";
+                                    }
+                                  }
+                                  var leftModifierPriority = modifierPriority(left.modifierLevel4);
+                                  var rightModifierPriority = modifierPriority(right.modifierLevel4);
+                                  if (leftModifierPriority != rightModifierPriority) {
+                                    leftModifierPriority - rightModifierPriority;
+                                  } else {
+                                    Reflect.compare(left.plainName, right.plainName);
+                                  }
+                                });
+                                var nameId = seed++;
+                                var hasFixedLengthName = '__hasFixedLength_$nameId';
+                                var extractingValueName = '__extractingValue_$nameId';
+                                var pairsName = '__pairs_$nameId';
+
+                                Some({
+                                  check: function(key:Expr, value:Expr):Expr return {
+                                    throw "TODO:";
+                                  },
+                                  lastPair: function():{key:Expr, value:Expr} return {
+                                    key: macro $i{pairsName}[$i{pairsName}.length - 2],
+                                    value: macro $i{pairsName}[$i{pairsName}.length - 1]
+                                  },
+                                  yieldPairs: function(check:Expr->Expr->Expr):Array<Expr> return {
+                                    [
+                                      (macro var $pairsName:Array<String> = ($i{extractingValueName}:String).split(",")),
+                                      switch nonExplodeVarspecs[0].modifierLevel4 {
+                                        case null:
+                                          macro if ($i{pairsName}.length % 2 == 1) {
+                                            throw "Expect even number of elements!"; // TODO: Exception definition
+                                          }
+                                        case PREFIX(limit):
+                                          macro if ($i{pairsName}.length % 2 == 1) {
+                                            if ($i{hasFixedLengthName}) {
+                                              throw "Expect even number of elements!"; // TODO: Exception definition
+                                            }
+                                          }
+                                        default: throw "Expect null or PREFIX";
+                                      },
+                                      {
+                                        var indexName = '__index_$nameId';
+                                        var keyName = '__key_$nameId';
+                                        var valueName = '__value_$nameId';
+                                        var checkExpr = check(macro $i{keyName}, macro $i{valueName});
+                                        macro for ($i{indexName} in 0...cast $i{pairsName}.length / 2) {
+                                          var $keyName = $i{pairsName}[$i{indexName} * 2];
+                                          var $valueName = $i{pairsName}[$i{indexName} * 2 + 1];
+                                          $checkExpr;
+                                          $i{handledValuesName}.set($i{keyName}, true);
+                                          @await $i{yieldPairName}(new jsonStream.JsonStream.JsonStreamPair(
+                                            $i{keyName},
+                                            jsonStream.JsonStream.STRING($i{valueName})
+                                          ));
+                                        }
+                                      }
+                                    ];
+                                  },
+                                  merge: function():Array<Expr> return {
+                                    var firstPlainName = nonExplodeVarspecs[0].plainName;
+                                    var mergeExprs = [
+                                      (macro var $extractingValueName = $uriParametersExpr.$firstPlainName),
+                                    ];
+                                    switch nonExplodeVarspecs[0].modifierLevel4 {
+                                      case null:
+                                        for (i in 1...nonExplodeVarspecs.length) {
+                                          var plainName = nonExplodeVarspecs[i].plainName;
+                                          switch nonExplodeVarspecs[i].modifierLevel4 {
+                                            case null:
+                                              mergeExprs.push(macro if ($uriParametersExpr.$plainName != $i{extractingValueName}) {
+                                                throw "Illegal data"; // TODO: exception definition
+                                              });
+                                            case PREFIX(limit):
+                                              mergeExprs.push(macro if (
+                                                $uriParametersExpr.plainName.length <= $v{limit} &&
+                                                $uriParametersExpr.plainName == $i{extractingValueName} ||
+                                                $uriParametersExpr.plainName.length == $v{limit} &&
+                                                StringTools.startsWith($i{extractingValueName}, $uriParametersExpr.plainName)
+                                              ) {
+                                                // Pass the test and do nothing
+                                              } else {
+                                                throw "Illegal data"; // TODO: exception definition
+                                              });
+                                            default: throw "Expect null or PREFIX";
+                                          }
+                                        }
+                                        mergeExprs;
+                                      case PREFIX(limit):
+                                        mergeExprs.push(macro var $hasFixedLengthName = $i{extractingValueName}.length < $v{limit});
+                                        for (i in 1...nonExplodeVarspecs.length) {
+                                          var plainName = nonExplodeVarspecs[i].plainName;
+                                          switch nonExplodeVarspecs[i].modifierLevel4 {
+                                            case PREFIX(limit):
+                                              mergeExprs.push(macro if (
+                                                $uriParametersExpr.$plainName.length <= $v{limit} &&
+                                                $uriParametersExpr.$plainName == $i{extractingValueName} ||
+                                                $uriParametersExpr.$plainName.length == $v{limit} &&
+                                                StringTools.startsWith($i{extractingValueName}, $uriParametersExpr.$plainName)
+                                              ) {
+                                                // Pass the test and do nothing
+                                              } else {
+                                                throw "Illegal data"; // TODO: exception definition
+                                              });
+                                            default: throw "Expect PREFIX";
+                                          }
+                                        }
+                                        mergeExprs;
+                                      default: throw "Expect PREFIX";
+                                    }
+                                  },
+                                  jsonString: function():Expr return {
+                                    macro jsonStream.JsonStream.STRING($i{extractingValueName});
+                                  },
+                                  hasFixedLength: function():Expr return {
+                                    if (nonExplodeVarspecs[0].modifierLevel4 == null) {
+                                      macro true;
+                                    } else {
+                                      macro $i{hasFixedLengthName};
+                                    }
+                                  }
+                                });
+
+                              }
+                            }
+                            var explodeVarspecOption = {
+                              var explodeVarspec = currentNode.values.find(function(varspec) return {
+                                varspec.modifierLevel4 != null && varspec.modifierLevel4.match(EXPLODE(_));
+                              });
+                              if (explodeVarspec != null) {
+                                Some({
+                                  yieldPairs: function(check:Expr->Expr->Expr):Expr return {
+                                    throw "TODO:";
+                                  }
+                                });
+                              } else {
+                                None;
+                              }
+                            }
+                            var submapOption = {
+                              if (currentNode.submap.empty()) {
+                                None;
+                              } else {
+                                Some({
+                                  yieldPairs: function():Expr return {
+                                    var yieldExprs = [
+                                      for (key in currentNode.submap.keys()) {
+                                        var subnode = currentNode.submap.get(key);
+                                        var valueExpr = extracting(subnode);
+                                        macro @await $i{yieldPairName}(new jsonStream.JsonStream.JsonStreamPair($v{key}, $valueExpr));
+                                      }
+                                    ];
+                                    macro {$a{yieldExprs}}
+                                  },
+                                  check: function(checkingKey:Expr, checkingValue:Expr):Expr return {
+                                    var cases = [
+                                      for (key in currentNode.submap.keys()) {
+                                        values: [ macro $v{key} ],
+                                        guard: null,
+                                        expr: {
+                                          var subnode = currentNode.submap.get(key);
+                                          var valueExpr = extracting(subnode);
+                                          macro switch ($valueExpr) {
+                                            case jsonStream.JsonStream.STRING(__value) if (__value == $checkingValue):
+                                            default:
+                                              throw "Bad data!"; // TODO: Exception definition
+                                          }
+                                        }
+                                      }
+                                    ];
+                                    {
+                                      pos: PositionTools.here(),
+                                      expr: ESwitch(
+                                        checkingKey,
+                                        cases,
+                                        null
+                                      )
+                                    }
+                                  },
+                                  yieldMorePairs: function(lastKey:Expr, lastValue:Expr):Expr return {
+                                    var cases = [
+                                      for (key in currentNode.submap.keys()) {
+                                        values: [ macro $v{key} ],
+                                        guard: null,
+                                        expr: {
+                                          var subnode = currentNode.submap.get(key);
+                                          var valueExpr = extracting(subnode);
+                                          macro switch ($valueExpr) {
+                                            case jsonStream.JsonStream.STRING(__value) if (StringTools.startsWith(__value, $lastValue)):
+                                              $i{handledValuesName}.set($lastKey, true);
+                                              @await $i{yieldPairName}(new jsonStream.JsonStream.JsonStreamPair($v{key}, $valueExpr));
+                                            default:
+                                              throw "Bad data!"; // TODO: Exception definition
+                                          }
+                                        }
+                                      }
+                                    ];
+                                    var yieldMorePairsExpr = [
+                                      for (key in currentNode.submap.keys()) {
+                                        var subnode = currentNode.submap.get(key);
+                                        var valueExpr = extracting(subnode);
+                                        macro if (!$i{handledValuesName}.exists($v{key})) {
+                                          @await $i{yieldPairName}(new jsonStream.JsonStream.JsonStreamPair($v{key}, $valueExpr));
+                                        }
+                                      }
+                                    ];
+                                    var switchLastKeyExpr = {
+                                      pos: PositionTools.here(),
+                                      expr: ESwitch(
+                                        lastKey,
+                                        cases,
+                                        macro @await $i{yieldPairName}(new jsonStream.JsonStream.JsonStreamPair(
+                                          $lastKey,
+                                          jsonStream.JsonStream.STRING($lastValue)
+                                        ))
+                                      )
+                                    }
+                                    macro {
+                                      if ($lastValue == null) {
+                                        @await $i{yieldPairName}(new jsonStream.JsonStream.JsonStreamPair(
+                                          $lastKey + " (incomplete)",
+                                          jsonStream.JsonStream.NULL
+                                        ));
+                                      } else {
+                                        $switchLastKeyExpr;
+                                      }
+                                      {$a{yieldMorePairsExpr}}
+                                    }
+                                  },
+                                  ensureNoMorePairs: function():Expr return {
+                                    var ensureNoMorePairsExprs = [
+                                      for (key in currentNode.submap.keys()) {
+                                        macro if (!$i{handledValuesName}.exists($v{key})) {
+                                          throw "Bad data"; // TODO: Excpetion definition
+                                        }
+                                      }
+                                    ];
+                                    macro {$a{ensureNoMorePairsExprs}}
+                                  }
+                                });
+                              }
+                            }
+                            function declareHandledValues():Expr return {
+                              (macro var $handledValuesName = new haxe.ds.StringMap<Bool>());
+                            }
+                            function createJsonObject(yieldPairsExpr:Expr):Expr return {
+                              macro jsonStream.JsonStream.OBJECT(
+                                new com.dongxiguo.continuation.utils.Generator<jsonStream.JsonStream.JsonStreamPair>(
+                                  com.dongxiguo.continuation.Continuation.cpsFunction(
+                                    function ($yieldPairName:com.dongxiguo.continuation.utils.Generator.YieldFunction<jsonStream.JsonStream.JsonStreamPair>) {
+                                      $yieldPairsExpr;
+                                    }
+                                  )
+                                )
+                              );
+                            }
+
+                            switch [nonExplodeVarspecOption, explodeVarspecOption, submapOption ] {
+                              case [ None, None, None]:
+                                macro jsonStream.JsonStream.NULL;
+                              case [ Some(nonExplodeVarspecGenerator), None, None]:
+                                // varspec without explode
+                                var exprs = nonExplodeVarspecGenerator.merge().concat([
+                                  nonExplodeVarspecGenerator.jsonString()
+                                ]);
+                                macro {$a{exprs}}
+                              case [ nonExplodeVarspecOption, Some(explodeVarspecGenerator), None]:
+                                // Only varspec with explode
+                                var exprs = (switch nonExplodeVarspecOption {
+                                  case Some(nonExplodeVarspecGenerator):
+                                    nonExplodeVarspecGenerator.merge();
+                                  case None:
+                                    [];
+                                }).concat([
+                                  declareHandledValues(),
+                                  explodeVarspecGenerator.yieldPairs(function(key:Expr, value:Expr) return {
+                                    switch nonExplodeVarspecOption {
+                                      case Some(nonExplodeVarspecGenerator):
+                                        nonExplodeVarspecGenerator.check(key, value);
+                                      case None:
+                                        macro null;
+                                    }
+                                  })
+                                ]);
+                                createJsonObject(macro {$a{exprs}});
+                              case [ nonExplodeVarspecOption, Some(explodeVarspecGenerator), Some(submapGenerator)]:
+                                // submap + varspec with explode
+                                var exprs = (switch nonExplodeVarspecOption {
+                                  case Some(nonExplodeVarspecGenerator):
+                                    nonExplodeVarspecGenerator.merge();
+                                  case None:
+                                    [];
+                                }).concat([
+                                  declareHandledValues(),
+                                  explodeVarspecGenerator.yieldPairs(function(key, value) return {
+                                    switch nonExplodeVarspecOption {
+                                      case Some(nonExplodeVarspecGenerator):
+                                        var check0Expr = submapGenerator.check(key, value);
+                                        var check1Expr = nonExplodeVarspecGenerator.check(key, value);
+                                        macro {
+                                          $check0Expr;
+                                          $check1Expr;
+                                        }
+                                      case None:
+                                        submapGenerator.check(key, value);
+                                    }
+                                  }),
+                                  submapGenerator.ensureNoMorePairs()
+                                ]);
+                                createJsonObject(macro {$a{exprs}});
+                              case [ Some(nonExplodeVarspecGenerator), None, Some(submapGenerator)]:
+                                // submap + varspec without explode
+                                var declareExprs = nonExplodeVarspecGenerator.merge();
+                                var hasFixedLengthExpr = nonExplodeVarspecGenerator.hasFixedLength();
+                                var yieldMorePairsExpr = switch nonExplodeVarspecGenerator.lastPair() {
+                                  case {key:key, value:value}:
+                                    submapGenerator.yieldMorePairs(key, value);
+                                }
+                                var ensureNoMorePairsExpr = submapGenerator.ensureNoMorePairs();
+                                var exprs = declareExprs.concat([
+                                  declareHandledValues()
+                                ]).concat(
+                                  nonExplodeVarspecGenerator.yieldPairs(submapGenerator.check.bind())
+                                ).concat([
+                                  macro if ($hasFixedLengthExpr) {
+                                    $ensureNoMorePairsExpr;
+                                  } else {
+                                    $yieldMorePairsExpr;
+                                  }
+                                ]);
+                                createJsonObject(macro {$a{exprs}});
+                              case [ None, None, Some(submapGenerator)]:
+                                // Only submap
+                                createJsonObject(submapGenerator.yieldPairs());
+                            }
+                          }
+                          extracting(variableNode);
+                        }
+                      }
+                      var yieldParameterName = '__yieldParameter_${seed++}';
+                      var extractingUriParameterExprs = [
+                        for (i in 0...numberOfUriParameters) {
+                          var arg = args[i];
+                          var parameterJsonStream = extractingToJsonStream(variableMap.get(arg.name), macro __uriParameters, macro __yield);
+                          macro @await $i{yieldParameterName}($parameterJsonStream);
+                        }
+                      ];
+//                      trace(new Printer().printExpr(macro {$a{extractingUriParameterExprs}}));
                       keyValues.push(
                         macro $v{fieldName} =>
                         new com.thoughtworks.microbuilder.core.GeneratedRouteConfiguration.GeneratedRouteEntry(
                           $v{httpMethod},
                           function(__parameterIterators:Iterator<jsonStream.JsonStream>):String return {
                             var __uriParameters = new $uriParametersTypePath();
-                            {$a{fillingExprs}}
+                            {$a{fillingUriParameterExprs}}
                             var __buffer = new autoParser.StringBuffer();
                             $formatterExpr.$generatingFormatMethodName(__buffer, __uriParameters);
                             __buffer.toString();
                           },
                           $v{requestContentType},
-                          function(uri:String):Null<com.thoughtworks.microbuilder.core.GeneratedRouteConfiguration.UriData> return {
-                            throw "TODO: Not implemented";
+                          function(__uri:String):Null<com.thoughtworks.microbuilder.core.GeneratedRouteConfiguration.UriData> return {
+                            var __source = new autoParser.StringSource(__uri);
+                            var __uriParameters = $parserExpr.$generatingParseMethodName(__source);
+                            if (__source.position != __uri.length) {
+                              null;
+                            } else {
+                              var __result = new com.thoughtworks.microbuilder.core.GeneratedRouteConfiguration.UriData();
+                              __result.parameters = com.dongxiguo.continuation.Continuation.cpsFunction(
+                                function($yieldParameterName:com.dongxiguo.continuation.utils.Generator.YieldFunction<jsonStream.JsonStream>) {$a{extractingUriParameterExprs}}
+                              );
+                              __result.methodName = $v{fieldName};
+                              __result;
+                            }
                           }
                         )
                       );
@@ -534,12 +927,22 @@ class RouteConfigurationFactory {
 
 private typedef VariableMap = StringMap<VariableNode>;
 
+@:final
+private class VariableDeclaration {
+  public function new() {}
+
+  public var plainName:String;
+
+  public var modifierLevel4:Null<ModifierLevel4>;
+
+}
+
 private class VariableNode {
 
   public function new() {}
 
   public var submap:VariableMap = new VariableMap();
 
-  public var values:Array<Varspec> = [];
+  public var values:Array<VariableDeclaration> = [];
 
 }

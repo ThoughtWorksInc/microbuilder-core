@@ -99,6 +99,7 @@ abstract SubDelims(Int) from Int to Int {
 abstract UnreservedCaptured(Array<UnreservedCharacter>) from Array<UnreservedCharacter> to Array<UnreservedCharacter> {}
 
 enum UnreservedCharacter {
+  COMMA(comma:Comma);
   UNRESERVED(unreserved:Unreserved);
   PCT_ENCODED(percent:Percent, hexDig0:HexDig, hexDig1:HexDig);
 }
@@ -115,10 +116,15 @@ abstract SimpleStringExpansion(String) from String to String {
       try {
         while (true) {
           var b = input.readByte();
-          if (Unreserved.accept(b)) {
-            output.push(UnreservedCharacter.UNRESERVED(b));
-          } else {
-            output.push(UnreservedCharacter.PCT_ENCODED(Percent.CHARACTER, HexDig.fromInt(b >>> 4), HexDig.fromInt(b & 0xF)));
+          switch b {
+            case Comma.CHARACTER:
+              output.push(UnreservedCharacter.COMMA(b));
+            default:
+              if (Unreserved.accept(b)) {
+                output.push(UnreservedCharacter.UNRESERVED(b));
+              } else {
+                output.push(UnreservedCharacter.PCT_ENCODED(Percent.CHARACTER, HexDig.fromInt(b >>> 4), HexDig.fromInt(b & 0xF)));
+              }
           }
         }
       } catch(e:Eof) {
@@ -132,6 +138,8 @@ abstract SimpleStringExpansion(String) from String to String {
     var buffer = new BytesOutput(); // TODO:
     for (c in (from:Array<UnreservedCharacter>)) {
       switch c {
+        case COMMA(b):
+          buffer.writeByte(b);
         case UNRESERVED(b):
           buffer.writeByte(b);
         case PCT_ENCODED(_, high, low):
@@ -263,7 +271,7 @@ abstract NonZeroDigit(Int) from Int to Int {
 }
 
 @:repeat(0, 3)
-abstract NoMoreThanThreeDigit(Array<Digit>) {}
+abstract NoMoreThanThreeDigit(Array<Digit>) from Array<Digit> to Array<Digit> {}
 
 @:final
 class MaxLength {
@@ -273,6 +281,33 @@ class MaxLength {
   public var first:NonZeroDigit;
 
   public var rest:NoMoreThanThreeDigit;
+}
+
+@:rewrite
+abstract Limit(Int) from Int to Int {
+
+  public static function rewriteFrom(prefix:Prefix):Limit return {
+    var sb = new StringBuf();
+    sb.addChar(prefix.maxLength.first);
+    for (c in (prefix.maxLength.rest:Array<Digit>)) {
+      sb.addChar(c);
+    }
+    Std.parseInt(sb.toString());
+  }
+
+  public static function rewriteTo(limit:Limit):Prefix return {
+    var s = Std.string(limit);
+    var ml = new MaxLength();
+    ml.first = s.charCodeAt(0);
+    ml.rest = [];
+    for (i in 1...s.length) {
+      ml.rest[i - 1] = s.charCodeAt(i);
+    }
+    var p = new Prefix();
+    p.maxLength = ml;
+    p;
+  }
+
 }
 
 @:final
@@ -295,7 +330,7 @@ abstract Explode(Int) from Int to Int {
 }
 
 enum ModifierLevel4 {
-  PREFIX(prefix:Prefix);
+  PREFIX(limit:Limit);
   EXPLODE(explode:Explode);
 }
 
@@ -308,7 +343,7 @@ class Varspec {
   public var varname:Varname;
 
   @:optional
-  public var modifierLevel4:ModifierLevel4;
+  public var modifierLevel4:Null<ModifierLevel4>;
 
 }
 

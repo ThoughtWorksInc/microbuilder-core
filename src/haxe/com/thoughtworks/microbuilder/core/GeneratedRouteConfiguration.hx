@@ -46,12 +46,10 @@ class GeneratedRouteConfiguration implements IRouteConfiguration {
           return JsonStream.OBJECT(new Generator<JsonStreamPair>(Continuation.cpsFunction(
             function(yield) {
               @await yield(new JsonStreamPair(matchedData.methodName, JsonStream.ARRAY(new Generator<JsonStream>(Continuation.cpsFunction(
-                function(yield) {
-                  for (parameter in matchedData.parameters) {
-                    @await yield(parameter);
-                  }
+                function(yieldParameter) {
+                  @await matchedData.parameters(yieldParameter);
                   if (requestContentType != null) {
-                    @await yield(body);
+                    @await yieldParameter(body);
                   }
                 }
               )))));
@@ -69,7 +67,8 @@ class GeneratedRouteConfiguration implements IRouteConfiguration {
 @:final
 class UriData {
   public var methodName:String;
-  public var parameters:Array<JsonStream>;
+  public var parameters:RunFunction<JsonStream>;
+  public function new() {}
 }
 
 @:dox(hide)
