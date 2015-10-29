@@ -50,14 +50,14 @@ class RouteConfigurationFactoryTest extends JsonTestCase {
 
 
   function testMatchUriForOverridenVariable():Void {
-    var rpcJsonStream = routeConfiguration.matchUri("GET", "/my-method2/id,a/id_should=/a", null, null);
+    var rpcJsonStream = routeConfiguration.matchUri("GET", "/my-method2/id,a/id_should=a", null, null);
     var rpcJson:Dynamic = JsonDeserializer.deserializeRaw(rpcJsonStream);
     assertEquals(1, rpcJson.myMethod2.length);
     assertEquals("a", rpcJson.myMethod2[0].id);
   }
 
   function testMatchUriForUnmatchedOverridenVariable():Void {
-    var rpcJsonStream = routeConfiguration.matchUri("GET", "/my-method2/id,a/id_should=/b", null, null);
+    var rpcJsonStream = routeConfiguration.matchUri("GET", "/my-method2/id,a/id_should=b", null, null);
     try {
       JsonDeserializer.deserializeRaw(rpcJsonStream);
       throw "Should not reach this line of code.";
@@ -65,6 +65,67 @@ class RouteConfigurationFactoryTest extends JsonTestCase {
       assertTrue(e != null);
     }
   }
+
+
+  function testMatchUriForComplexOverridenVariable1():Void {
+    var uri = "/my-method3/id,foo,name,bar/id_should=foo/name_should=bar";
+    var rpcJsonStream = routeConfiguration.matchUri("GET", uri, null, null);
+    var rpcJson:Dynamic = JsonDeserializer.deserializeRaw(rpcJsonStream);
+    assertEquals(1, rpcJson.myMethod3.length);
+    assertEquals("foo", rpcJson.myMethod3[0].id);
+    assertEquals("bar", rpcJson.myMethod3[0].name);
+  }
+
+  function testMatchUriForComplexOverridenVariable2():Void {
+    var uri = "/my-method3/name,bar,id,foo/id_should=foo/name_should=bar";
+    var rpcJsonStream = routeConfiguration.matchUri("GET", uri, null, null);
+    var rpcJson:Dynamic = JsonDeserializer.deserializeRaw(rpcJsonStream);
+    assertEquals(1, rpcJson.myMethod3.length);
+    assertEquals("foo", rpcJson.myMethod3[0].id);
+    assertEquals("bar", rpcJson.myMethod3[0].name);
+  }
+
+  function testMatchUriForComplexOverridenVariable3():Void {
+    var uri = "/my-method3/name,bar,id,foo,moreKey1,moreValue1,moreKey2,moreValue2/id_should=foo/name_should=bar";
+    var rpcJsonStream = routeConfiguration.matchUri("GET", uri, null, null);
+    var rpcJson:Dynamic = JsonDeserializer.deserializeRaw(rpcJsonStream);
+    assertEquals(1, rpcJson.myMethod3.length);
+    assertEquals("foo", rpcJson.myMethod3[0].id);
+    assertEquals("bar", rpcJson.myMethod3[0].name);
+    assertEquals("moreValue2", rpcJson.myMethod3[0].moreKey2);
+    assertEquals("moreValue1", rpcJson.myMethod3[0].moreKey1);
+  }
+
+
+  function testMatchUriForUnmatchedComplexOverridenVariable():Void {
+    var rpcJsonStream = routeConfiguration.matchUri("GET", "/my-method3/name,bar,id,foo/id_should=foo/name_should=baz", null, null);
+    try {
+      JsonDeserializer.deserializeRaw(rpcJsonStream);
+      throw "Should not reach this line of code.";
+    } catch(e:Dynamic) {
+      assertTrue(e != null);
+    }
+  }
+
+  /* // Does not support render complex parameter yet, disable this test currently
+  function testRestore() {
+    var uri = "/my-method3/name,bar,id,foo,moreKey1,moreValue1,moreKey2,moreValue2/id_should=foo/name_should=bar";
+    var rpcJsonStream = routeConfiguration.matchUri("GET", uri, null, null);
+    switch rpcJsonStream {
+      case OBJECT(methodIterator):
+        assertTrue(methodIterator.hasNext());
+        switch methodIterator.next() {
+          case { key:methodName, value:ARRAY(parameters) }:
+            assertEquals(uri, routeConfiguration.nameToUriTemplate(methodName).render(parameters));
+          default:
+            throw "Expect ARRAY";
+        }
+        assertFalse(methodIterator.hasNext());
+      default:
+        throw "Expect OBJECT, actrually " + rpcJsonStream;
+    }
+  }
+  */
 
 }
 

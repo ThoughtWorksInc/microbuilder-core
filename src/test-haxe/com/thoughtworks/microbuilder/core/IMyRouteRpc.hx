@@ -1,6 +1,7 @@
 package com.thoughtworks.microbuilder.core;
 
 import jsonStream.rpc.Future;
+import jsonStream.RawJson;
 
 class MyStructureFailure {}
 
@@ -9,9 +10,12 @@ interface IMyRouteRpc {
 
   @:requestContentType("text/plain")
   @:route("GET", "/my-method/{foo.id}/{id}/name/{foo.fooBar}/{foo.fooBar}")
-  function myMethod(id:Int, foo:String, content:String):Future<String>;
+  function myMethod(id:Int, foo:RawJson, content:String):Future<String>;
 
-  @:route("GET", "/my-method2/{foo}/id_should=/{foo.id}")
-  function myMethod2(foo:String):Future<String>;
+  @:route("GET", "/my-method2/{foo}/id_should={foo.id}")
+  function myMethod2(foo:RawJson):Future<String>;
+
+  @:route("GET", "/my-method3/{foo}/id_should={foo.id}/name_should={foo.name}")
+  function myMethod3(foo:RawJson):Future<String>;
 
 }
