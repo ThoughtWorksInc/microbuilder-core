@@ -24,7 +24,7 @@ abstract HexDig(Int) from Int to Int {
     if ((digit:Int) >= "0".code && (digit:Int) <= "9".code) {
       (digit:Int) - "0".code;
     } else if ((digit:Int) >= "A".code && (digit:Int) <= "F".code) {
-      (digit:Int) - "A".code;
+      (digit:Int) - "A".code + 0xA;
     } else {
       throw "Expect [0-9A-F]";
     }

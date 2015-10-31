@@ -8,6 +8,9 @@ class MyStructureFailure {}
 @:structuralFailure(com.thoughtworks.microbuilder.core.IMyRouteRpc.MyStructureFailure)
 interface IMyRouteRpc {
 
+  @:route("GET", "/simple-method/{simpleJson}")
+  function simpleMethod(simpleJson:RawJson):Future<String>;
+
   @:requestContentType("text/plain")
   @:route("GET", "/my-method/{foo.id}/{id}/name/{foo.fooBar}/{foo.fooBar}")
   function myMethod(id:Int, foo:RawJson, content:String):Future<String>;

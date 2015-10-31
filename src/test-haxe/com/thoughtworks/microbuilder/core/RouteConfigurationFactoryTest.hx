@@ -14,6 +14,31 @@ class RouteConfigurationFactoryTest extends JsonTestCase {
     assertEquals("text/plain", routeConfiguration.nameToUriTemplate("myMethod").requestContentType);
   }
 
+  function testMatchUriUnescape():Void {
+    var rpcJsonStream = routeConfiguration.matchUri("GET", "/simple-method/%580,%20%59%0D%0A", null, null);
+    var rpcJson:Dynamic = JsonDeserializer.deserializeRaw(rpcJsonStream);
+    assertEquals(1, rpcJson.simpleMethod.length);
+    assertEquals("X0, Y\r\n", rpcJson.simpleMethod[0]);
+  }
+
+  function testEscape():Void {
+    var uri = "/simple-method/%0A,%20,%0D";
+    var rpcJsonStream = routeConfiguration.matchUri("GET", uri, null, null);
+    switch rpcJsonStream {
+      case OBJECT(methodIterator):
+        assertTrue(methodIterator.hasNext());
+        switch methodIterator.next() {
+          case { key:methodName, value:ARRAY(parameters) }:
+            assertEquals(uri, routeConfiguration.nameToUriTemplate(methodName).render(parameters));
+          default:
+            throw "Expect ARRAY";
+        }
+        assertFalse(methodIterator.hasNext());
+      default:
+        throw "Expect OBJECT, actrually " + rpcJsonStream;
+    }
+  }
+
   function testMatchUri():Void {
     var rpcJsonStream = routeConfiguration.matchUri("GET", "/my-method/aaa/4/name/xxx/xxx", JsonStream.STRING("content"), "text/plain");
     var rpcJson:Dynamic = JsonDeserializer.deserializeRaw(rpcJsonStream);
