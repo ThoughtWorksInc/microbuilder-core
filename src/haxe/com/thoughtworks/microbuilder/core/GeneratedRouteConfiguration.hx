@@ -22,6 +22,11 @@ class GeneratedRouteConfiguration implements IRouteConfiguration {
     routeEntries.get(name);
   }
 
+  public var failureResponseContentType(get, never):Null<String>;
+
+  // TODO: generate this method
+  private function get_failureResponseContentType():Null<String> return "application/json";
+
   private var _failureClassName:String;
 
   public var failureClassName(get, never):String;
@@ -38,23 +43,26 @@ class GeneratedRouteConfiguration implements IRouteConfiguration {
     }
   }
 
-  public function matchUri(method:String, uri:String, body:Null<JsonStream>, requestContentType:Null<String>):Null<JsonStream> return {
+  public function matchUri(method:String, uri:String, body:Null<JsonStream>, requestContentType:Null<String>):Null<MatchResult> return {
     for (entry in routeEntries) {
       if (method == entry.method && requestContentType == entry.requestContentType) {
         var matchedData = entry.parseUri(uri);
         if (matchedData != null) {
-          return JsonStream.OBJECT(new Generator<JsonStreamPair>(Continuation.cpsFunction(
-            function(yield) {
-              @await yield(new JsonStreamPair(matchedData.methodName, JsonStream.ARRAY(new Generator<JsonStream>(Continuation.cpsFunction(
-                function(yieldParameter) {
-                  @await matchedData.parameters(yieldParameter);
-                  if (requestContentType != null) {
-                    @await yieldParameter(body);
+          return new MatchResult(
+            entry,
+            JsonStream.OBJECT(new Generator<JsonStreamPair>(Continuation.cpsFunction(
+              function(yield) {
+                @await yield(new JsonStreamPair(matchedData.methodName, JsonStream.ARRAY(new Generator<JsonStream>(Continuation.cpsFunction(
+                  function(yieldParameter) {
+                    @await matchedData.parameters(yieldParameter);
+                    if (requestContentType != null) {
+                      @await yieldParameter(body);
+                    }
                   }
-                }
-              )))));
-            }
-          )));
+                )))));
+              }
+            )))
+          );
         }
       }
     }
@@ -77,9 +85,14 @@ class GeneratedRouteEntry implements IRouteEntry {
 
   public var parseUri:String -> Null<UriData>;
 
+  public var responseContentType(get, never):Null<String>;
+
   public var requestContentType(get, never):Null<String>;
 
   private var _requestContentType:Null<String>;
+
+  // TODO: generate this method
+  private function get_responseContentType():Null<String> return "application/json";
 
   private function get_requestContentType():Null<String> return _requestContentType;
 
