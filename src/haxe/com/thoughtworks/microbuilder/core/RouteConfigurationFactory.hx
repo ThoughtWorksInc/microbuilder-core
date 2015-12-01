@@ -190,57 +190,72 @@ class RouteConfigurationFactory {
                               )
                             });
                           case EXPRESSION(_, operator, variableList, _):
-                            switch operator {
-                              case null:
-                                switch variableList.rest {
-                                  case []:
-                                    var varspec = variableList.first;
+                            switch variableList.rest {
+                              case []:
+                                var varspec = variableList.first;
 
-                                    if (varspec.modifierLevel4 != null) {
-                                      // TODO: Level 4
-                                      throw "Level 1-3 templates does not support modifiers.";
-                                    }
-                                    var buffer = new StringBuffer();
-                                    UriTemplateFormatter.format_com_thoughtworks_microbuilder_core_Varname(buffer, varspec.varname);
-                                    var varname = buffer.toString();
-                                    var variablePath = varname.split(".");
-                                    var variablePlainName = '${generatedFieldName(variablePath)}_${seed++}';
-                                    var variableDeclaration = new VariableDeclaration();
-                                    variableDeclaration.plainName = variablePlainName;
-                                    variableDeclaration.modifierLevel4 = varspec.modifierLevel4;
-                                    function insertToVariableMap(level:Int, map:VariableMap):Void {
-                                      var element = variablePath[level];
-                                      var nextLevel = level + 1;
-                                      var node = switch map.get(element) {
-                                        case null:
-                                          var newNode = new VariableNode();
-                                          map.set(element, newNode);
-                                          newNode;
-                                        case node:
-                                          node;
-                                      }
-                                      if (nextLevel < variablePath.length) {
-                                        insertToVariableMap(nextLevel, node.submap);
-                                      } else {
-                                        node.values.push(variableDeclaration);
-                                      }
-                                    }
-                                    insertToVariableMap(0, variableMap);
+                                if (varspec.modifierLevel4 != null) {
+                                  // TODO: Level 4
+                                  throw "Level 1-3 templates does not support modifiers.";
+                                }
+                                var buffer = new StringBuffer();
+                                UriTemplateFormatter.format_com_thoughtworks_microbuilder_core_Varname(buffer, varspec.varname);
+                                var varname = buffer.toString();
+                                var variablePath = varname.split(".");
+                                var variablePlainName = '${generatedFieldName(variablePath)}_${seed++}';
+                                var variableDeclaration = new VariableDeclaration();
+                                variableDeclaration.plainName = variablePlainName;
+                                variableDeclaration.modifierLevel4 = varspec.modifierLevel4;
+                                function insertToVariableMap(level:Int, map:VariableMap):Void {
+                                  var element = variablePath[level];
+                                  var nextLevel = level + 1;
+                                  var node = switch map.get(element) {
+                                    case null:
+                                      var newNode = new VariableNode();
+                                      map.set(element, newNode);
+                                      newNode;
+                                    case node:
+                                      node;
+                                  }
+                                  if (nextLevel < variablePath.length) {
+                                    insertToVariableMap(nextLevel, node.submap);
+                                  } else {
+                                    node.values.push(variableDeclaration);
+                                  }
+                                }
+                                insertToVariableMap(0, variableMap);
+
+                                switch operator {
+                                  case null:
                                     uriParameterFields.push({
                                       access: [ APublic ],
                                       name: variablePlainName,
                                       pos: PositionTools.here(),
                                       kind: FVar(macro : com.thoughtworks.microbuilder.core.UriTemplate.SimpleStringExpansion, null)
                                     });
-                                    // TODO:
-                                  default:
-                                    // TODO: Level 3-4
-                                    throw "Level 1-2 templates are limited to a single varspec per expression.";
-                                }
+                                  case OP_LEVEL2(operator):
+                                    switch operator {
+                                      case OpLevel2.PLUS:
+// TODO: working in process...
+                                      case OpLevel2.HASH:
+// TODO: working in process...
+                                    }
 
+                                  default:
+// TODO: Level 2-4
+                                    throw "Level 1 templates does not support operator: ${String.fromCharCode(operator)}";
+                                }
+                                // TODO:
                               default:
-                                // TODO: Level 2-4
-                                throw "Level 1 templates does not support operator: ${String.fromCharCode(operator)}";
+                                // TODO: Generate compound types...
+                                // 是否必须生成额外类型？
+                                // 无论如何，@:rewrite都不能避免吗？可以把@:rewrite放到filling阶段，
+                                // 但因为要编写代码对全null进行解析处理，所以一定需要额外层级，而额外层级意味着一定要生成额外数据结构
+                                //
+                                // 如何描述最复杂的 {?foo,bar,baz} 解析模板？
+                                // 统一用 first / rest 方式描述。其中部分的first类型和rest的元素类型要用代码生成，因为modifier不同，可能限制字符数量或者限制 key 候选字符。
+                                // TODO: Level 3-4
+                                throw "Level 1-2 templates are limited to a single varspec per expression.";
                             }
                         }
                       }
