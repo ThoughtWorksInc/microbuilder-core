@@ -37,12 +37,12 @@ for (c <- AllHaxeConfigurations) yield {
 haxelibDependencies += "auto-parser" -> DependencyVersion.SpecificVersion("0.2.0")
 
 for (c <- AllHaxeConfigurations) yield {
-  libraryDependencies += "com.thoughtworks.microbuilder" %% "json-stream" % "2.0.0" % c classifier c.name
+  libraryDependencies += "com.thoughtworks.microbuilder" %% "json-stream" % "2.0.3" % c classifier c.name
 }
 
-haxelibDependencies += "json-stream" -> DependencyVersion.SpecificVersion("2.0.0")
+haxelibDependencies += "json-stream" -> DependencyVersion.SpecificVersion("2.0.3")
 
-libraryDependencies += "com.thoughtworks.microbuilder" %% "json-stream" % "2.0.0" % Provided
+libraryDependencies += "com.thoughtworks.microbuilder" %% "json-stream" % "2.0.3" % Provided
 
 for (c <- AllTargetConfigurations ++ AllTestTargetConfigurations) yield {
   haxeOptions in c += (baseDirectory.value / "build.hxml").getAbsolutePath
