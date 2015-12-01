@@ -22,6 +22,8 @@ developers := List(
   )
 )
 
+crossScalaVersions := Seq("2.10.6", "2.11.7")
+
 libraryDependencies ++= Seq("com.qifun.sbt-haxe" %% "test-interface" % "0.1.1" % Test)
 
 for (c <- AllHaxeConfigurations) yield {
@@ -101,6 +103,8 @@ releaseProcess := Seq[ReleaseStep](
 )
 
 releaseUseGlobalVersion := false
+
+releaseCrossBuild := true
 
 scmInfo := Some(ScmInfo(
   url(s"https://github.com/ThoughtWorksInc/${name.value}"),
