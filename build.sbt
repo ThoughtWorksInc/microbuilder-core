@@ -10,7 +10,7 @@ haxelibReleaseNote := "Initial release"
 
 haxelibTags ++= Seq(
   "cross", "cpp", "cs", "flash", "java", "javascript", "js", "neko", "php", "python", "nme",
-  "macro", "utility"
+  "macro", "utility", "rpc", "rest", "micro-service"
 )
 
 developers := List(
