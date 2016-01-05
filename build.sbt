@@ -22,8 +22,6 @@ developers := List(
   )
 )
 
-crossScalaVersions := Seq("2.10.6", "2.11.7")
-
 libraryDependencies ++= Seq("com.qifun.sbt-haxe" %% "test-interface" % "0.1.1" % Test)
 
 for (c <- AllHaxeConfigurations) yield {
@@ -37,12 +35,12 @@ for (c <- AllHaxeConfigurations) yield {
 haxelibDependencies += "auto-parser" -> DependencyVersion.SpecificVersion("0.2.0")
 
 for (c <- AllHaxeConfigurations) yield {
-  libraryDependencies += "com.thoughtworks.microbuilder" %% "json-stream" % "2.0.3" % c classifier c.name
+  libraryDependencies += "com.thoughtworks.microbuilder" % "json-stream-core" % "3.0.0" % c classifier c.name
 }
 
-haxelibDependencies += "json-stream" -> DependencyVersion.SpecificVersion("2.0.3")
+haxelibDependencies += "json-stream-core" -> DependencyVersion.SpecificVersion("3.0.0")
 
-libraryDependencies += "com.thoughtworks.microbuilder" %% "json-stream" % "2.0.3" % Provided
+libraryDependencies += "com.thoughtworks.microbuilder" % "json-stream-core" % "3.0.0" % Provided
 
 for (c <- AllTargetConfigurations ++ AllTestTargetConfigurations) yield {
   haxeOptions in c += (baseDirectory.value / "build.hxml").getAbsolutePath
@@ -79,6 +77,10 @@ homepage := Some(url(s"https://github.com/ThoughtWorksInc/${name.value}"))
 
 startYear := Some(2015)
 
+autoScalaLibrary := false
+
+crossPaths := false
+
 releasePublishArtifactsAction := PgpKeys.publishSigned.value
 
 import ReleaseTransformations._
@@ -101,7 +103,7 @@ releaseProcess := Seq[ReleaseStep](
 
 releaseUseGlobalVersion := false
 
-releaseCrossBuild := true
+releaseCrossBuild := false
 
 scmInfo := Some(ScmInfo(
   url(s"https://github.com/ThoughtWorksInc/${name.value}"),
