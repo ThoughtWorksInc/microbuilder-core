@@ -9,7 +9,7 @@ import jsonStream.io.TextParser;
 import jsonStream.io.PrettyTextPrinter;
 import Type;
 
-@:nativeGen
+@:abstract
 class MicrobuilderOutgoingJsonService implements IJsonService {
   
   var urlPrefix:String;
@@ -27,12 +27,7 @@ class MicrobuilderOutgoingJsonService implements IJsonService {
   }
 
   @:abstract
-  public function post(url:String, httpMethod:String, requestContentType:String, requestBody: String):Void {
-    throw "Not implemented!";
-  }
-
-  @:abstract
-  public function send(url:String, httpMethod:String, requestContentType:String, requestBody: String, responseHandler:Null<Dynamic>->?Int->?String->Void):Void {
+  public function send(url:String, httpMethod:String, requestContentType:String, requestBody: String, ?responseHandler:Null<Dynamic>->?Int->?String->Void):Void {
     throw "Not implemented!";
   }
 
@@ -53,7 +48,7 @@ class MicrobuilderOutgoingJsonService implements IJsonService {
                 } else {
                   null;
                 }
-                post(url, routeEntry.method, routeEntry.requestContentType, requestBody);
+                send(url, routeEntry.method, routeEntry.requestContentType, requestBody);
               default:
                 throw "parameter should be a JSON array";
             }
