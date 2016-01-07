@@ -9,11 +9,7 @@ interface IRouteConfiguration {
 
   public var failureResponseContentType(get, never):Null<String>;
 
-  private function get_failureResponseContentType():Null<String>;
-
   public var failureClassName(get, never):String;
-
-  private function get_failureClassName():String;
 
   /**
    * Returns a JsonStream that represents the RPC, for example:
@@ -54,8 +50,6 @@ interface IRouteEntry {
 
   public var method(get, never):String;
 
-  private function get_method():String;
-
   /**
    * 约定参数列表的无法被uri template消费的参数（应该是最后一个）作为请求体
    */
@@ -63,10 +57,6 @@ interface IRouteEntry {
 
   public var responseContentType(get, never):Null<String>;
 
-  private function get_responseContentType():Null<String>;
-
   public var requestContentType(get, never):Null<String>;
-
-  private function get_requestContentType():Null<String>;
 
 }
