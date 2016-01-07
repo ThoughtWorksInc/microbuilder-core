@@ -27,6 +27,9 @@ before_install:
  - if [[ "$HAXE_TARGET" = "java" ]]; then travis_retry haxelib install hxjava --always; fi
  - if [[ "$HAXE_TARGET" = "cs" ]]; then travis_retry haxelib install hxcs --always; fi
 
+ # Use a fork version of mockatoo because the stable release of mockatoo does not support Java
+ - if [[ "$HAXE_TARGET" = "java" ]]; then travis_retry haxelib git mockatoo https://github.com/Atry/mockatoo.git patch-1 src --always; fi
+
 install:
   - sbt ";++$TRAVIS_SCALA_VERSION;haxelibInstallDependencies;update"
 
