@@ -63,7 +63,7 @@ for (c <- AllTestTargetConfigurations) yield {
 }
 
 val haxelibs = Map(
-  "mockatoo" -> DependencyVersion.LastVersion,
+  "mockatoo" -> DependencyVersion.GitVersion("https://github.com/Atry/mockatoo.git", "patch-1", "src"),
   "continuation" -> DependencyVersion.SpecificVersion("1.3.2"),
   "microbuilder-HUGS" -> DependencyVersion.SpecificVersion("2.0.1")
 )
