@@ -86,7 +86,7 @@ class MicrobuilderOutgoingJsonService implements IJsonService {
                       } catch (e:TextParserError) {
                         var serializationFailure = CoreSerializer.dynamicSerialize(
                           ValueType.TEnum(Failure),
-                          Failure.SERIALIZATION_FAILURE("Wrong Json format: " + responseBody)
+                          Failure.SERIALIZATION_FAILURE("Wrong JSON format: " + responseBody)
                         );
                         responseHandler.onFailure(JsonStream.OBJECT(generator1(serializationFailure)));
                       }
@@ -97,27 +97,29 @@ class MicrobuilderOutgoingJsonService implements IJsonService {
                           Failure.TEXT_APPLICATION_FAILURE(responseBody, status));
                         responseHandler.onFailure(JsonStream.OBJECT(generator1(textFailure)));
                       } else {
-                        responseHandler.onFailure(
-                          JsonStream.OBJECT(
-                            generator1(
-                              new JsonStreamPair(
-                                "com.thoughtworks.microbuilder.core.Failure", JsonStream.OBJECT(
-                                  generator1(
-                                    new JsonStreamPair(
-                                      "STRUCTURAL_APPLICATION_FAILURE", JsonStream.OBJECT(
-                                        new Generator<JsonStreamPair>(
-                                          Continuation.cpsFunction(
-                                            function(yield:YieldFunction<JsonStreamPair>) {
-                                              @await yield(new JsonStreamPair(
-                                                "failure",
-                                                JsonStream.OBJECT(
-                                                  generator1(new JsonStreamPair(routeConfiguration.failureClassName, TextParser.parseString(responseBody)))
-                                                )
-                                              ));
-                                              @await yield(new JsonStreamPair(
-                                                "status", JsonStream.INT32(status)
-                                              ));
-                                            }
+                        try {
+                          responseHandler.onFailure(
+                            JsonStream.OBJECT(
+                              generator1(
+                                new JsonStreamPair(
+                                  "com.thoughtworks.microbuilder.core.Failure", JsonStream.OBJECT(
+                                    generator1(
+                                      new JsonStreamPair(
+                                        "STRUCTURAL_APPLICATION_FAILURE", JsonStream.OBJECT(
+                                          new Generator<JsonStreamPair>(
+                                            Continuation.cpsFunction(
+                                              function(yield:YieldFunction<JsonStreamPair>) {
+                                                @await yield(new JsonStreamPair(
+                                                  "failure",
+                                                  JsonStream.OBJECT(
+                                                    generator1(new JsonStreamPair(routeConfiguration.failureClassName, TextParser.parseString(responseBody)))
+                                                  )
+                                                ));
+                                                @await yield(new JsonStreamPair(
+                                                  "status", JsonStream.INT32(status)
+                                                ));
+                                              }
+                                            )
                                           )
                                         )
                                       )
@@ -126,8 +128,14 @@ class MicrobuilderOutgoingJsonService implements IJsonService {
                                 )
                               )
                             )
-                          )
-                        );
+                          );
+                        } catch (e:TextParserError) {
+                          var serializationFailure = CoreSerializer.dynamicSerialize(
+                            ValueType.TEnum(Failure),
+                            Failure.SERIALIZATION_FAILURE("Wrong JSON format: " + responseBody)
+                          );
+                          responseHandler.onFailure(JsonStream.OBJECT(generator1(serializationFailure)));
+                        }
                       }
                     }
                   } else {
