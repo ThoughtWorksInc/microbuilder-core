@@ -1,5 +1,6 @@
 package com.thoughtworks.microbuilder.core;
 
+import haxe.ds.Vector;
 import haxe.unit.TestCase;
 import jsonStream.JsonSerializer;
 import jsonStream.JsonDeserializer;
@@ -17,7 +18,7 @@ class MicrobuilderOutgoingJsonServiceTest extends JsonTestCase {
     var urlPrefix = "http://fake-url.com/fake/path";
 
     var mockedRouteEntry = mock(IRouteConfiguration.IRouteEntry);
-    mockedRouteEntry.render(cast any).returns("/rendered/result");
+    mockedRouteEntry.render(cast any).returns(new IRouteConfiguration.Request("GET", "/rendered/result", Vector.fromArrayCopy([]), null, null, null));
 
     var mockedRouteConfiguration = mock(IRouteConfiguration);
     mockedRouteConfiguration.nameToUriTemplate("myMethod").returns(mockedRouteEntry);

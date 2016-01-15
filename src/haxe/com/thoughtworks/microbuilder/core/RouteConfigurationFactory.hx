@@ -130,6 +130,18 @@ class RouteConfigurationFactory {
                         ]
                       }
                     ]: {
+                      var dynamicRequestHeaders = new StringMap<String>();
+                      var staticRequestHeaders = new StringMap<String>();
+                      for (requestHeader in field.meta.extract(":requestHeader")) {
+                        switch requestHeader {
+                        case { params: [ { expr: EConst(CString(headerName)) }, { expr: EConst(CString(staticHeaderValue)) } ] }:
+                          staticRequestHeaders.set(headerName, staticHeaderValue);
+                        case { params: [ { expr: EConst(CString(headerName)) }, { expr: EConst(CIdent(dynamicHeaderValue)) } ] }:
+                          dynamicRequestHeaders.set(headerName, dynamicHeaderValue);
+                        default:
+                          throw Context.error("Expect @:requestHeader(\"Your-Header-Name\", \"Your-Header-Value\") or @:requestHeader(\"Your-Header-Name\", yourParameterName)", requestHeader.pos);
+                        }
+                      }
                       var requestContentType = switch field.meta.extract(":requestContentType") {
                         case []:
                           null;
@@ -137,6 +149,14 @@ class RouteConfigurationFactory {
                           contentType;
                         case entries:
                           throw Context.error("Expect @:requestContentType(\"some/mime.type\")", entries[0].pos);
+                      }
+                      var responseContentType = switch field.meta.extract(":responseContentType") {
+                        case []:
+                          null;
+                        case [ { params: [ (ExprEvaluator.evaluate(_):String) => contentType ] } ]:
+                          contentType;
+                        case entries:
+                          throw Context.error("Expect @:responseContentType(\"some/mime.type\")", entries[0].pos);
                       }
                       var source = new StringSource(uriTemplateText);
                       var variableMap = new VariableMap();
@@ -841,18 +861,49 @@ class RouteConfigurationFactory {
                         }
                       ];
 //                      trace(new Printer().printExpr(macro {$a{extractingUriParameterExprs}}));
+                      function exprStringMap(data:StringMap<String>):ExprOf<StringMap<String>> return {
+                        if (data.empty()) {
+                          macro new haxe.ds.StringMap<String>();
+                        } else {
+                          var keyValues = [
+                            for (key in data.keys()) {
+                              var value = data.get(key);
+                              macro $v{key} => $v{value};
+                            }
+                          ];
+                          macro [ $a{keyValues} ];
+                        }
+                      }
+                      // var staticRequestHeadersExpr = exprStringMap(staticRequestHeaders);
+                      // var dynamicRequestHeadersExpr = exprStringMap(dynamicRequestHeaders);
+                      // TODO: request header
+                      var bodyExpr = if (requestContentType != null) {
+                        macro __parameterIterators.next();
+                      } else {
+                        macro null;
+                      }
                       keyValues.push(
                         macro $v{fieldName} =>
                         new com.thoughtworks.microbuilder.core.GeneratedRouteConfiguration.GeneratedRouteEntry(
                           $v{httpMethod},
-                          function(__parameterIterators:Iterator<jsonStream.JsonStream>):String return {
+                          function(__parameterIterators:Iterator<jsonStream.JsonStream>):com.thoughtworks.microbuilder.core.IRouteConfiguration.Request return {
+                            var __headerBuilder = [];
                             var __uriParameters = new $uriParametersTypePath();
                             {$a{fillingUriParameterExprs}}
                             var __buffer = new autoParser.StringBuffer();
                             $formatterExpr.$generatingFormatMethodName(__buffer, __uriParameters);
-                            __buffer.toString();
+                            //httpMethod:String, uri:String, headers:Vector<Header>, body:Null<JsonStream>, contentType:Null<String>, accept:Null<String>
+                            new com.thoughtworks.microbuilder.core.IRouteConfiguration.Request(
+                              $v{httpMethod},
+                              __buffer.toString(),
+                              haxe.ds.Vector.fromArrayCopy(__headerBuilder),
+                              $bodyExpr,
+                              $v{requestContentType},
+                              $v{responseContentType}
+                            );
                           },
                           $v{requestContentType},
+                          $v{responseContentType},
                           function(__uri:String):Null<com.thoughtworks.microbuilder.core.GeneratedRouteConfiguration.UriData> return {
                             var __source = new autoParser.StringSource(__uri);
                             var __uriParameters = $parserExpr.$generatingParseMethodName(__source);

@@ -11,7 +11,9 @@ import com.dongxiguo.continuation.utils.Generator;
 @:final
 class GeneratedRouteConfiguration implements IRouteConfiguration {
 
-  public function new(routeEntries:StringMap<GeneratedRouteEntry>, failureClassName:String) {
+  public function new(
+    routeEntries:StringMap<GeneratedRouteEntry>,
+    failureClassName:String) {
     this.routeEntries = routeEntries;
     _failureClassName = failureClassName;
   }
@@ -43,10 +45,10 @@ class GeneratedRouteConfiguration implements IRouteConfiguration {
     }
   }
 
-  public function matchUri(method:String, uri:String, body:Null<JsonStream>, requestContentType:Null<String>):Null<MatchResult> return {
+  public function matchUri(request:Request):Null<MatchResult> return {
     for (entry in routeEntries) {
-      if (method == entry.method && requestContentType == entry.requestContentType) {
-        var matchedData = entry.parseUri(uri);
+      if (request.httpMethod == entry.method && request.contentType == entry.requestContentType) {
+        var matchedData = entry.parseUri(request.uri);
         if (matchedData != null) {
           return new MatchResult(
             entry,
@@ -55,8 +57,8 @@ class GeneratedRouteConfiguration implements IRouteConfiguration {
                 @await yield(new JsonStreamPair(matchedData.methodName, JsonStream.ARRAY(new Generator<JsonStream>(Continuation.cpsFunction(
                   function(yieldParameter) {
                     @await matchedData.parameters(yieldParameter);
-                    if (requestContentType != null) {
-                      @await yieldParameter(body);
+                    if (request.contentType != null) {
+                      @await yieldParameter(request.body);
                     }
                   }
                 )))));
@@ -90,28 +92,35 @@ class GeneratedRouteEntry implements IRouteEntry {
   public var requestContentType(get, never):Null<String>;
 
   private var _requestContentType:Null<String>;
+  private var _responseContentType:Null<String>;
 
   // TODO: generate this method
-  private function get_responseContentType():Null<String> return "application/json";
+  private function get_responseContentType():Null<String> return _responseContentType;
 
   private function get_requestContentType():Null<String> return _requestContentType;
 
-  public function new(method:String, renderFunction:Iterator<JsonStream> -> String, requestContentType:Null<String>, parseUri:String -> Null<UriData>) {
+  public function new(
+    method:String,
+    renderFunction:Iterator<JsonStream> -> Request,
+    requestContentType:Null<String>,
+    responseContentType:Null<String>,
+    parseUri:String -> Null<UriData>) {
     this._method = method;
     this.renderFunction = renderFunction;
     this._requestContentType = requestContentType;
+    this._responseContentType = responseContentType;
     this.parseUri = parseUri;
   }
 
   var _method:String;
 
-  var renderFunction:Iterator<JsonStream> -> String;
+  var renderFunction:Iterator<JsonStream> -> Request;
 
   public var method(get, never):String;
 
   private function get_method():String return _method;
 
-  public function render(parameters:Iterator<JsonStream>):String return {
+  public function render(parameters:Iterator<JsonStream>):Request return {
     renderFunction(parameters);
   }
 

@@ -11,15 +11,15 @@ import Type;
 
 @:abstract
 class MicrobuilderOutgoingJsonService implements IJsonService {
-  
+
   var urlPrefix:String;
   var routeConfiguration:IRouteConfiguration;
-  
+
   public function new(urlPrefix: String, routeConfiguration:IRouteConfiguration) {
     this.urlPrefix = urlPrefix;
     this.routeConfiguration = routeConfiguration;
   }
-  
+
   function generator1<A>(a:A):Generator<A> return {
     new Generator<A>(Continuation.cpsFunction(function(yield:YieldFunction<A>) {
       @await yield(a);
@@ -42,13 +42,14 @@ class MicrobuilderOutgoingJsonService implements IJsonService {
             switch pair.value {
               case ARRAY(parameters):
                 var routeEntry = routeConfiguration.nameToUriTemplate(pair.key);
-                var url = '$urlPrefix${routeEntry.render(parameters)}';
-                var requestBody = if (parameters.hasNext()) {
-                  PrettyTextPrinter.toString(parameters.next());
+                var request = routeEntry.render(parameters);
+                var url = '$urlPrefix${request.uri}';
+                var requestBody = if (request.body != null) {
+                  PrettyTextPrinter.toString(request.body);
                 } else {
                   null;
                 }
-                send(url, routeEntry.method, routeEntry.requestContentType, requestBody);
+                send(url, request.httpMethod, request.contentType, requestBody);
               default:
                 throw "parameter should be a JSON array";
             }
@@ -60,7 +61,7 @@ class MicrobuilderOutgoingJsonService implements IJsonService {
         throw "request should be a JSON object";
     }
   }
-  
+
   public function apply(requestJson:JsonStream, responseHandler:IJsonResponseHandler):Void {
     switch requestJson {
       case OBJECT(pairs):
@@ -72,13 +73,14 @@ class MicrobuilderOutgoingJsonService implements IJsonService {
             switch pair.value {
               case ARRAY(parameters):
                 var routeEntry = routeConfiguration.nameToUriTemplate(pair.key);
-                var url = '$urlPrefix${routeEntry.render(parameters)}';
-                var requestBody = if (parameters.hasNext()) {
-                  PrettyTextPrinter.toString(parameters.next());
+                var request = routeEntry.render(parameters);
+                var url = '$urlPrefix${request.uri}';
+                var requestBody = if (request.body != null) {
+                  PrettyTextPrinter.toString(request.body);
                 } else {
                   null;
                 }
-                send(url, routeEntry.method, routeEntry.requestContentType, requestBody, function(error, ?status, ?responseBody) {
+                send(url, request.httpMethod, request.contentType, requestBody, function(error, ?status, ?responseBody) {
                   if (error == null) {
                     if (status >= 200 && status < 400) {
                       try {

@@ -1,5 +1,7 @@
 package com.thoughtworks.microbuilder.core;
 
+import haxe.ds.Vector;
+import com.thoughtworks.microbuilder.core.IRouteConfiguration.Request;
 import haxe.unit.TestCase;
 import jsonStream.JsonSerializer;
 import jsonStream.JsonDeserializer;
@@ -10,12 +12,8 @@ import jsonStream.io.TextParser;
 class RouteConfigurationFactoryTest extends JsonTestCase {
   var routeConfiguration = RouteConfigurationTestFactory.routeConfiguration_com_thoughtworks_microbuilder_core_IMyRouteRpc();
 
-  function testRequestContentType():Void {
-    assertEquals("text/plain", routeConfiguration.nameToUriTemplate("myMethod").requestContentType);
-  }
-
   function testMatchUriUnescape():Void {
-    var matchResult = routeConfiguration.matchUri("GET", "/simple-method/%580,%20%59%0D%0A", null, null);
+    var matchResult = routeConfiguration.matchUri(new Request("GET", "/simple-method/%580,%20%59%0D%0A", Vector.fromArrayCopy([]), null, null, null));
     var rpcJson:Dynamic = JsonDeserializer.deserializeRaw(matchResult.rpcData);
     assertEquals(1, rpcJson.simpleMethod.length);
     assertEquals("X0, Y\r\n", rpcJson.simpleMethod[0]);
@@ -23,13 +21,13 @@ class RouteConfigurationFactoryTest extends JsonTestCase {
 
   function testEscape():Void {
     var uri = "/simple-method/%0A,%20,%0D";
-    var matchResult = routeConfiguration.matchUri("GET", uri, null, null);
+    var matchResult = routeConfiguration.matchUri(new Request("GET", uri, Vector.fromArrayCopy([]), null, null, null));
     switch matchResult.rpcData {
       case OBJECT(methodIterator):
         assertTrue(methodIterator.hasNext());
         switch methodIterator.next() {
           case { key:methodName, value:ARRAY(parameters) }:
-            assertEquals(uri, routeConfiguration.nameToUriTemplate(methodName).render(parameters));
+            assertEquals(uri, routeConfiguration.nameToUriTemplate(methodName).render(parameters).uri);
           default:
             throw "Expect ARRAY";
         }
@@ -40,7 +38,7 @@ class RouteConfigurationFactoryTest extends JsonTestCase {
   }
 
   function testMatchUri():Void {
-    var matchResult = routeConfiguration.matchUri("GET", "/my-method/aaa/4/name/xxx/xxx", JsonStream.STRING("content"), "text/plain");
+    var matchResult = routeConfiguration.matchUri(new Request("GET", "/my-method/aaa/4/name/xxx/xxx", Vector.fromArrayCopy([]), JsonStream.STRING("content"), "text/plain", null));
     var rpcJson:Dynamic = JsonDeserializer.deserializeRaw(matchResult.rpcData);
     assertEquals(3, rpcJson.myMethod.length);
     assertEquals("4", rpcJson.myMethod[0]);
@@ -49,22 +47,22 @@ class RouteConfigurationFactoryTest extends JsonTestCase {
   }
 
   function testMatchUriWithIncorrectRequestContentType():Void {
-    var matchResult = routeConfiguration.matchUri("GET", "/my-method/aaa/4/name/xxx/xxx", JsonStream.STRING("content"), "application/json+incorrect-content-type");
+    var matchResult = routeConfiguration.matchUri(new Request("GET", "/my-method/aaa/4/name/xxx/xxx", Vector.fromArrayCopy([]), JsonStream.STRING("content"), "application/json+incorrect-content-type", null));
     assertEquals(null, matchResult);
   }
 
   function testMatchUriWithIncorrectMethod():Void {
-    var matchResult = routeConfiguration.matchUri("POST", "/my-method/aaa/4/name/xxx/xxx", JsonStream.STRING("content"), "text/plain");
+    var matchResult = routeConfiguration.matchUri(new Request("POST", "/my-method/aaa/4/name/xxx/xxx", Vector.fromArrayCopy([]), JsonStream.STRING("content"), "text/plain", null));
     assertEquals(null, matchResult);
   }
 
   function testMatchUriWithUnmatchedUri():Void {
-    var matchResult = routeConfiguration.matchUri("GET", "/my-method/aaa/4/name/xxx/xxx/-unmatched", JsonStream.STRING("content"), "text/plain");
+    var matchResult = routeConfiguration.matchUri(new Request("GET", "/my-method/aaa/4/name/xxx/xxx/-unmatched", Vector.fromArrayCopy([]), JsonStream.STRING("content"), "text/plain", null));
     assertEquals(null, matchResult);
   }
 
   function testMatchUriWithIncorrectUri():Void {
-    var matchResult = routeConfiguration.matchUri("GET", "/my-method/aaa/4/name/xxx/xxx-incorrect", JsonStream.STRING("content"), "text/plain");
+    var matchResult = routeConfiguration.matchUri(new Request("GET", "/my-method/aaa/4/name/xxx/xxx-incorrect", Vector.fromArrayCopy([]), JsonStream.STRING("content"), "text/plain", null));
     try {
       JsonDeserializer.deserializeRaw(matchResult.rpcData);
       throw "Should not reach this line of code.";
@@ -75,14 +73,14 @@ class RouteConfigurationFactoryTest extends JsonTestCase {
 
 
   function testMatchUriForOverridenVariable():Void {
-    var matchResult = routeConfiguration.matchUri("GET", "/my-method2/id,a/id_should=a", null, null);
+    var matchResult = routeConfiguration.matchUri(new Request("GET", "/my-method2/id,a/id_should=a", Vector.fromArrayCopy([]), null, null, null));
     var rpcJson:Dynamic = JsonDeserializer.deserializeRaw(matchResult.rpcData);
     assertEquals(1, rpcJson.myMethod2.length);
     assertEquals("a", rpcJson.myMethod2[0].id);
   }
 
   function testMatchUriForUnmatchedOverridenVariable():Void {
-    var matchResult = routeConfiguration.matchUri("GET", "/my-method2/id,a/id_should=b", null, null);
+    var matchResult = routeConfiguration.matchUri(new Request("GET", "/my-method2/id,a/id_should=b", Vector.fromArrayCopy([]), null, null, null));
     try {
       JsonDeserializer.deserializeRaw(matchResult.rpcData);
       throw "Should not reach this line of code.";
@@ -94,7 +92,7 @@ class RouteConfigurationFactoryTest extends JsonTestCase {
 
   function testMatchUriForComplexOverridenVariable1():Void {
     var uri = "/my-method3/id,foo,name,bar/id_should=foo/name_should=bar";
-    var matchResult = routeConfiguration.matchUri("GET", uri, null, null);
+    var matchResult = routeConfiguration.matchUri(new Request("GET", uri, Vector.fromArrayCopy([]), null, null, null));
     var rpcJson:Dynamic = JsonDeserializer.deserializeRaw(matchResult.rpcData);
     assertEquals(1, rpcJson.myMethod3.length);
     assertEquals("foo", rpcJson.myMethod3[0].id);
@@ -103,7 +101,7 @@ class RouteConfigurationFactoryTest extends JsonTestCase {
 
   function testMatchUriForComplexOverridenVariable2():Void {
     var uri = "/my-method3/name,bar,id,foo/id_should=foo/name_should=bar";
-    var matchResult = routeConfiguration.matchUri("GET", uri, null, null);
+    var matchResult = routeConfiguration.matchUri(new Request("GET", uri, Vector.fromArrayCopy([]), null, null, null));
     var rpcJson:Dynamic = JsonDeserializer.deserializeRaw(matchResult.rpcData);
     assertEquals(1, rpcJson.myMethod3.length);
     assertEquals("foo", rpcJson.myMethod3[0].id);
@@ -112,7 +110,7 @@ class RouteConfigurationFactoryTest extends JsonTestCase {
 
   function testMatchUriForComplexOverridenVariable3():Void {
     var uri = "/my-method3/name,bar,id,foo,moreKey1,moreValue1,moreKey2,moreValue2/id_should=foo/name_should=bar";
-    var matchResult = routeConfiguration.matchUri("GET", uri, null, null);
+    var matchResult = routeConfiguration.matchUri(new Request("GET", uri, Vector.fromArrayCopy([]), null, null, null));
     var rpcJson:Dynamic = JsonDeserializer.deserializeRaw(matchResult.rpcData);
     assertEquals(1, rpcJson.myMethod3.length);
     assertEquals("foo", rpcJson.myMethod3[0].id);
@@ -123,7 +121,7 @@ class RouteConfigurationFactoryTest extends JsonTestCase {
 
 
   function testMatchUriForUnmatchedComplexOverridenVariable():Void {
-    var matchResult = routeConfiguration.matchUri("GET", "/my-method3/name,bar,id,foo/id_should=foo/name_should=baz", null, null);
+    var matchResult = routeConfiguration.matchUri(new Request("GET", "/my-method3/name,bar,id,foo/id_should=foo/name_should=baz", Vector.fromArrayCopy([]), null, null, null));
     try {
       JsonDeserializer.deserializeRaw(matchResult.rpcData);
       throw "Should not reach this line of code.";
