@@ -49,6 +49,7 @@ class MicrobuilderOutgoingJsonService implements IJsonService {
                 } else {
                   null;
                 }
+                // TODO: send custom headers
                 send(url, request.httpMethod, request.contentType, requestBody);
               default:
                 throw "parameter should be a JSON array";
@@ -80,6 +81,7 @@ class MicrobuilderOutgoingJsonService implements IJsonService {
                 } else {
                   null;
                 }
+                // TODO: send custom headers
                 send(url, request.httpMethod, request.contentType, requestBody, function(error, ?status, ?responseBody) {
                   if (error == null) {
                     if (status >= 200 && status < 400) {

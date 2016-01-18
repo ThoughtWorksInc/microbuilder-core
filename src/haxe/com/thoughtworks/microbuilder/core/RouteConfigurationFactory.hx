@@ -130,18 +130,6 @@ class RouteConfigurationFactory {
                         ]
                       }
                     ]: {
-                      var dynamicRequestHeaders = new StringMap<String>();
-                      var staticRequestHeaders = new StringMap<String>();
-                      for (requestHeader in field.meta.extract(":requestHeader")) {
-                        switch requestHeader {
-                        case { params: [ { expr: EConst(CString(headerName)) }, { expr: EConst(CString(staticHeaderValue)) } ] }:
-                          staticRequestHeaders.set(headerName, staticHeaderValue);
-                        case { params: [ { expr: EConst(CString(headerName)) }, { expr: EConst(CIdent(dynamicHeaderValue)) } ] }:
-                          dynamicRequestHeaders.set(headerName, dynamicHeaderValue);
-                        default:
-                          throw Context.error("Expect @:requestHeader(\"Your-Header-Name\", \"Your-Header-Value\") or @:requestHeader(\"Your-Header-Name\", yourParameterName)", requestHeader.pos);
-                        }
-                      }
                       var requestContentType = switch field.meta.extract(":requestContentType") {
                         case []:
                           null;
@@ -160,6 +148,58 @@ class RouteConfigurationFactory {
                       }
                       var source = new StringSource(uriTemplateText);
                       var variableMap = new VariableMap();
+                      var requestHeaderMetas = field.meta.extract(":requestHeader");
+                      var headersLength = requestHeaderMetas.length;
+                      for (i in 0...requestHeaderMetas.length) {
+                        switch requestHeaderMetas[i] {
+                        case { params: [ { expr: EConst(CString(headerName)) }, { expr: EConst(CString(staticHeaderValue)) } ] }:
+                          // macro __headers[$v{i}] = new com.thoughtworks.microbuilder.core.IRouteConfiguration.Header($v{headerName}, $v{staticHeaderValue});
+                        case { params: [ { expr: EConst(CString(headerName)) }, expr ] }:
+                          var headerPath = {
+                            var buf = [];
+                            function buildPlainName(expr:Expr):Void {
+                              switch expr {
+                              case { expr: EConst(CIdent(ident)) }:
+                                buf.push(ident);
+                              case { expr: EField(parent, field) }:
+                                buildPlainName(parent);
+                                buf.push(field);
+                              default:
+                                throw Context.error("Expect @:requestHeader(\"Your-Header-Name\", \"Your-Header-Value\") or @:requestHeader(\"Your-Header-Name\", yourParameterName)", expr.pos);
+                              }
+                            }
+                            buildPlainName(expr);
+                            buf;
+                          }
+
+                          var headerDeclaration = new HeaderDeclaration();
+                          headerDeclaration.index = i;
+                          headerDeclaration.name = headerName;
+
+                          function insertToVariableMap(level:Int, map:VariableMap):Void {
+                            var element = headerPath[level];
+                            var nextLevel = level + 1;
+                            var node = switch map.get(element) {
+                              case null:
+                                var newNode = new VariableNode();
+                                map.set(element, newNode);
+                                newNode;
+                              case node:
+                                node;
+                            }
+                            if (nextLevel < headerPath.length) {
+                              insertToVariableMap(nextLevel, node.submap);
+                            } else {
+                              node.headers.push(headerDeclaration);
+                            }
+                          }
+                          insertToVariableMap(0, variableMap);
+                          // macro __headers[$v{i}] = new com.thoughtworks.microbuilder.core.IRouteConfiguration.Header($v{headerName}, __uriParameters.$plainName);
+                        case requestHeader:
+                          throw Context.error("Expect @:requestHeader(\"Your-Header-Name\", \"Your-Header-Value\") or @:requestHeader(\"Your-Header-Name\", yourParameterName)", requestHeader.pos);
+                        }
+                      }
+
                       var uriTemplate:Array<LiteralsOrExpression> = UriTemplateParser.parse_com_thoughtworks_microbuilder_core_UriTemplate(source);
                       var uriParameterName = generateUriParametersClassName(className, classType.pack, classType.name, fieldName);
                       var uriParameterFields:Array<Field> = [{
@@ -295,13 +335,6 @@ class RouteConfigurationFactory {
                         if (variableNode == null) {
                           macro jsonStream.JsonDeserializer.JsonDeserializerRuntime.skip($jsonStream);
                         } else {
-                          function generatedVariableFieldName(varnameAst:Varname):String return {
-                            var buffer = new StringBuffer();
-                            UriTemplateFormatter.format_com_thoughtworks_microbuilder_core_Varname(buffer, varnameAst);
-                            var varname = buffer.toString();
-                            var variablePath = varname.split(".");
-                            generatedFieldName(variablePath);
-                          }
                           var fillNull = if (variableNode.submap.empty()) {
                             var blockExprs = [
                               for (varspec in variableNode.values) {
@@ -313,7 +346,19 @@ class RouteConfigurationFactory {
                                 }
                               }
                             ];
-                            macro {$a{blockExprs}}; // TODO
+                            var headerExprs = [
+                              for (header in variableNode.headers) {
+                                var index = header.index;
+                                var name = header.name;
+                                macro {
+                                  __headers[$v{index}] = new com.thoughtworks.microbuilder.core.IRouteConfiguration.Header($v{name}, null);
+                                }
+                              }
+                            ];
+                            macro {
+                              {$a{blockExprs}};
+                              {$a{headerExprs}};
+                            }
                           } else {
                             macro throw "Expect OBJECT"; // TODO: Exception definition.
                           }
@@ -328,100 +373,108 @@ class RouteConfigurationFactory {
                                 }
                               }
                             ];
-                            macro {$a{blockExprs}}; // TODO
+                            var headerExprs = [
+                              for (header in variableNode.headers) {
+                                var index = header.index;
+                                var name = header.name;
+                                macro {
+                                  __headers[$v{index}] = new com.thoughtworks.microbuilder.core.IRouteConfiguration.Header($v{name}, __stringValue);
+                                }
+                              }
+                            ];
+                            macro {
+                              {$a{blockExprs}};
+                              {$a{headerExprs}};
+                            }
                           } else {
                             macro throw "Expect OBJECT"; // TODO: Exception definition.
                           }
                           var fillPair = if (variableNode.submap.empty()) {
-                            var blockExprs = [
-                              for (varspec in variableNode.values) {
-                                if (varspec.modifierLevel4 != null) {
-                                  throw "Level 1-3 templates do not support modifiers.";
-                                } else {
-                                  macro {
-                                    __commaSeparated.push(__pair.key);
-                                    __commaSeparated.push(switch (__pair.value) {
-                                      case STRING(__stringValue):
-                                        __stringValue;
-                                      case ARRAY(__elements):
-                                        throw "Expect String"; // TODO: Exception definition.
-                                      case OBJECT(__pairs):
-                                        throw "Expect String"; // TODO: Exception definition.
-                                      case NUMBER(__numberValue):
-                                        Std.string(__numberValue);
-                                      case TRUE:
-                                        "true";
-                                      case FALSE:
-                                        "false";
-                                      case NULL:
-                                        $fillNull;
-                                      case INT32(__intValue):
-                                        Std.string(__intValue);
-                                      case INT64(__high, __low):
-                                        haxe.Int64.toStr(haxe.Int64.make(__high, __low));
-                                      case BINARY(__bytes):
-                                        __bytes.toString();
-                                    });
-                                  }
-                                }
-                              }
-                            ];
-                            macro {$a{blockExprs}}; // TODO
+
+                            macro {
+                              __commaSeparated.push(__pair.key);
+                              __commaSeparated.push(switch (__pair.value) {
+                                case STRING(__stringValue):
+                                  __stringValue;
+                                case ARRAY(__elements):
+                                  throw "Expect String"; // TODO: Exception definition.
+                                case OBJECT(__pairs):
+                                  throw "Expect String"; // TODO: Exception definition.
+                                case NUMBER(__numberValue):
+                                  Std.string(__numberValue);
+                                case TRUE:
+                                  "true";
+                                case FALSE:
+                                  "false";
+                                case NULL:
+                                  null;
+                                case INT32(__intValue):
+                                  Std.string(__intValue);
+                                case INT64(__high, __low):
+                                  haxe.Int64.toStr(haxe.Int64.make(__high, __low));
+                                case BINARY(__bytes):
+                                  __bytes.toString();
+                              });
+                            }
                           } else {
                             macro throw "Expect OBJECT"; // TODO: Exception definition.
                           }
                           var fillElement = if (variableNode.submap.empty()) {
-                            var blockExprs = [
-                              for (varspec in variableNode.values) {
-                                if (varspec.modifierLevel4 != null) {
-                                  throw "Level 1-3 templates do not support modifiers.";
-                                } else {
-                                  macro __commaSeparated.push(switch (__element) {
-                                      case STRING(__stringValue):
-                                        __stringValue;
-                                      case ARRAY(__elements):
-                                        throw "Expect String"; // TODO: Exception definition.
-                                      case OBJECT(__pairs):
-                                        throw "Expect String"; // TODO: Exception definition.
-                                      case NUMBER(__numberValue):
-                                        Std.string(__numberValue);
-                                      case TRUE:
-                                        "true";
-                                      case FALSE:
-                                        "false";
-                                      case NULL:
-                                        $fillNull;
-                                      case INT32(__intValue):
-                                        Std.string(__intValue);
-                                      case INT64(__high, __low):
-                                        haxe.Int64.toStr(haxe.Int64.make(__high, __low));
-                                      case BINARY(__bytes):
-                                        __bytes.toString();
-                                    });
-                                }
-                              }
-                            ];
-                            macro {$a{blockExprs}}; // TODO
+                            macro __commaSeparated.push(switch (__element) {
+                                case STRING(__stringValue):
+                                  __stringValue;
+                                case ARRAY(__elements):
+                                  throw "Expect String"; // TODO: Exception definition.
+                                case OBJECT(__pairs):
+                                  throw "Expect String"; // TODO: Exception definition.
+                                case NUMBER(__numberValue):
+                                  Std.string(__numberValue);
+                                case TRUE:
+                                  "true";
+                                case FALSE:
+                                  "false";
+                                case NULL:
+                                  null;
+                                case INT32(__intValue):
+                                  Std.string(__intValue);
+                                case INT64(__high, __low):
+                                  haxe.Int64.toStr(haxe.Int64.make(__high, __low));
+                                case BINARY(__bytes):
+                                  __bytes.toString();
+                              });
                           } else {
                             macro throw "Expect OBJECT"; // TODO: Exception definition.
                           }
-                          var optionalCommaSeparatedDefinition = if (variableNode.values.length > 0) {
+                          var optionalCommaSeparatedDefinition = if (variableNode.values.length > 0 || variableNode.headers.length > 0) {
                             macro var __commaSeparated = [];
                           } else {
                             macro null;
                           }
-                          var optionalCommaSeparatedResult = if (variableNode.values.length > 0) {
+                          var optionalCommaSeparatedResult = if (variableNode.values.length > 0 || variableNode.headers.length > 0) {
                             var blockExprs = [
                               for (varspec in variableNode.values) {
                                 if (varspec.modifierLevel4 != null) {
                                   throw "Level 1-3 templates do not support modifiers.";
                                 } else {
                                   var variablePlainName = varspec.plainName;
-                                  macro $uriParametersExpr.$variablePlainName = __commaSeparated.join(",");
+                                  macro $uriParametersExpr.$variablePlainName = __commaSeparatedString;
                                 }
                               }
                             ];
-                            macro {$a{blockExprs}}; // TODO
+                            var headerExprs = [
+                              for (header in variableNode.headers) {
+                                var index = header.index;
+                                var name = header.name;
+                                macro {
+                                  __headers[$v{index}] = new com.thoughtworks.microbuilder.core.IRouteConfiguration.Header($v{name}, __commaSeparatedString);
+                                }
+                              }
+                            ];
+                            macro {
+                              var __commaSeparatedString = __commaSeparated.join(",");
+                              {$a{blockExprs}};
+                              {$a{headerExprs}};
+                            }
                           } else {
                             macro null;
                           }
@@ -877,6 +930,35 @@ class RouteConfigurationFactory {
                       // var staticRequestHeadersExpr = exprStringMap(staticRequestHeaders);
                       // var dynamicRequestHeadersExpr = exprStringMap(dynamicRequestHeaders);
                       // TODO: request header
+
+
+                      var fillingStaticHeaders = [
+                        for (i in 0...requestHeaderMetas.length) {
+                          switch requestHeaderMetas[i] {
+                          case { params: [ { expr: EConst(CString(headerName)) }, { expr: EConst(CString(staticHeaderValue)) } ] }:
+                            macro __headers[$v{i}] = new com.thoughtworks.microbuilder.core.IRouteConfiguration.Header($v{headerName}, $v{staticHeaderValue});
+                          case { params: [ { expr: EConst(CString(headerName)) }, _ ] }:
+                            macro null;
+                          case requestHeader:
+                            throw Context.error("Expect @:requestHeader(\"Your-Header-Name\", \"Your-Header-Value\") or @:requestHeader(\"Your-Header-Name\", yourParameterName)", requestHeader.pos);
+                          }
+                        }
+                      ];
+
+                      //
+                      //
+                      // var dynamicRequestHeaders = new StringMap<String>();
+                      // var staticRequestHeaders = new StringMap<String>();
+                      // for (requestHeader in field.meta.extract(":requestHeader")) {
+                      //   switch requestHeader {
+                      //   case { params: [ { expr: EConst(CString(headerName)) }, { expr: EConst(CString(staticHeaderValue)) } ] }:
+                      //     staticRequestHeaders.set(headerName, staticHeaderValue);
+                      //   case { params: [ { expr: EConst(CString(headerName)) }, { expr: EConst(CIdent(dynamicHeaderValue)) } ] }:
+                      //     dynamicRequestHeaders.set(headerName, dynamicHeaderValue);
+                      //   default:
+                      //     throw Context.error("Expect @:requestHeader(\"Your-Header-Name\", \"Your-Header-Value\") or @:requestHeader(\"Your-Header-Name\", yourParameterName)", requestHeader.pos);
+                      //   }
+                      // }
                       var bodyExpr = if (requestContentType != null) {
                         macro __parameterIterators.next();
                       } else {
@@ -887,16 +969,16 @@ class RouteConfigurationFactory {
                         new com.thoughtworks.microbuilder.core.GeneratedRouteConfiguration.GeneratedRouteEntry(
                           $v{httpMethod},
                           function(__parameterIterators:Iterator<jsonStream.JsonStream>):com.thoughtworks.microbuilder.core.IRouteConfiguration.Request return {
-                            var __headerBuilder = [];
+                            var __headers = new haxe.ds.Vector<com.thoughtworks.microbuilder.core.IRouteConfiguration.Header>($v{headersLength});
                             var __uriParameters = new $uriParametersTypePath();
                             {$a{fillingUriParameterExprs}}
                             var __buffer = new autoParser.StringBuffer();
                             $formatterExpr.$generatingFormatMethodName(__buffer, __uriParameters);
-                            //httpMethod:String, uri:String, headers:Vector<Header>, body:Null<JsonStream>, contentType:Null<String>, accept:Null<String>
+                            {$a{fillingStaticHeaders}}
                             new com.thoughtworks.microbuilder.core.IRouteConfiguration.Request(
                               $v{httpMethod},
                               __buffer.toString(),
-                              haxe.ds.Vector.fromArrayCopy(__headerBuilder),
+                              __headers,
                               $bodyExpr,
                               $v{requestContentType},
                               $v{responseContentType}
@@ -988,6 +1070,17 @@ private class VariableDeclaration {
 
 }
 
+@:final
+private class HeaderDeclaration {
+
+  public function new() {}
+
+  public var index:Int;
+
+  public var name:String;
+
+}
+
 private class VariableNode {
 
   public function new() {}
@@ -995,5 +1088,7 @@ private class VariableNode {
   public var submap:VariableMap = new VariableMap();
 
   public var values:Array<VariableDeclaration> = [];
+
+  public var headers:Array<HeaderDeclaration> = [];
 
 }
