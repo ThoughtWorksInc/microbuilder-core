@@ -6,7 +6,7 @@ organization := "com.thoughtworks.microbuilder"
 
 name := "microbuilder-core"
 
-haxelibReleaseNote := "Initial release"
+haxelibReleaseNote := "Support custom headers for caller"
 
 haxelibTags ++= Seq(
   "cross", "cpp", "cs", "flash", "java", "javascript", "js", "neko", "php", "python", "nme",
