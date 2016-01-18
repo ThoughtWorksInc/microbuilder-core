@@ -194,7 +194,6 @@ class RouteConfigurationFactory {
                             }
                           }
                           insertToVariableMap(0, variableMap);
-                          // macro __headers[$v{i}] = new com.thoughtworks.microbuilder.core.IRouteConfiguration.Header($v{headerName}, __uriParameters.$plainName);
                         case requestHeader:
                           throw Context.error("Expect @:requestHeader(\"Your-Header-Name\", \"Your-Header-Value\") or @:requestHeader(\"Your-Header-Name\", yourParameterName)", requestHeader.pos);
                         }
@@ -989,7 +988,7 @@ class RouteConfigurationFactory {
                           function(__uri:String):Null<com.thoughtworks.microbuilder.core.GeneratedRouteConfiguration.UriData> return {
                             var __source = new autoParser.StringSource(__uri);
                             var __uriParameters = $parserExpr.$generatingParseMethodName(__source);
-                            if (__source.position != __uri.length) {
+                            if (__uriParameters == null || __source.position != __uri.length) {
                               null;
                             } else {
                               var __result = new com.thoughtworks.microbuilder.core.GeneratedRouteConfiguration.UriData();
