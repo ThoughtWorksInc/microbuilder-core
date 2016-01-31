@@ -18,4 +18,7 @@ project/plugins/project/
 
 .idea/
 *.iml
+
+# Files created for deployment
+secret/
 local.sbt
