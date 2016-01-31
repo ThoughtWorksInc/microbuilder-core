@@ -2,6 +2,8 @@
 
 cat ./secret/sonatype.sbt >> ./local.sbt &&
 
+cat ./secret/haxelib.sbt >> ./local.sbt &&
+
 git log --max-count=1 --format=format:%an | xargs -0 -n 1 git config --global -- user.name &&
 git log --max-count=1 --format=format:%ae | xargs -0 -n 1 git config --global -- user.email &&
 
