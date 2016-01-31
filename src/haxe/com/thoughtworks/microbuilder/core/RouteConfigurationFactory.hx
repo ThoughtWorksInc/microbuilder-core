@@ -308,6 +308,7 @@ class RouteConfigurationFactory {
                         name: uriParameterName,
                         pos: PositionTools.here(),
                         kind: TDClass(),
+                        meta: [ { pos: PositionTools.here(), name: ":dox", params: [ macro hide ] } ],
                         fields: uriParameterFields
                       }
                       uriParametersDefinitions.push(uriParameterDefinition);
@@ -1039,11 +1040,27 @@ class RouteConfigurationFactory {
     Context.defineModule(uriTemplatesModule, uriParametersDefinitions);
     AutoParser.BUILDER.defineClass(
       [ '${factoryModule}_UriParameters' ],
-      parserModule
+      parserModule,
+      null,
+      [
+        {
+          pos: PositionTools.here(),
+          name: ":dox",
+          params: [ macro hide ]
+        }
+      ]
     );
     AutoFormatter.BUILDER.defineClass(
       [ '${factoryModule}_UriParameters' ],
-      formatterModule
+      formatterModule,
+      null,
+      [
+        {
+          pos: PositionTools.here(),
+          name: ":dox",
+          params: [ macro hide ]
+        }
+      ]
     );
     fields;
   }

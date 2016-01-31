@@ -25,7 +25,7 @@ developers := List(
 libraryDependencies ++= Seq("com.qifun.sbt-haxe" %% "test-interface" % "0.1.1" % Test)
 
 for (c <- AllHaxeConfigurations) yield {
-  libraryDependencies += "com.thoughtworks.microbuilder" % "hamu" % "0.2.0" % c classifier c.name
+  libraryDependencies += "com.thoughtworks.microbuilder" % "hamu" % "0.2.1" % c classifier c.name
 }
 
 for (c <- AllHaxeConfigurations) yield {
