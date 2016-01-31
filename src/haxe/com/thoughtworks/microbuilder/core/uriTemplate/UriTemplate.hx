@@ -1,4 +1,4 @@
-package com.thoughtworks.microbuilder.core;
+package com.thoughtworks.microbuilder.core.uriTemplate;
 
 import haxe.io.BytesOutput;
 import haxe.io.Eof;

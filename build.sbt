@@ -6,7 +6,7 @@ organization := "com.thoughtworks.microbuilder"
 
 name := "microbuilder-core"
 
-haxelibReleaseNote := "Hide internal classes in Dox documentation"
+haxelibReleaseNote := "Move UriTemplate to a separate package."
 
 haxelibTags ++= Seq(
   "cross", "cpp", "cs", "flash", "java", "javascript", "js", "neko", "php", "python", "nme",
@@ -47,19 +47,19 @@ for (c <- AllTargetConfigurations ++ AllTestTargetConfigurations) yield {
 }
 
 for (c <- AllTestTargetConfigurations) yield {
-  haxeMacros in c += """autoParser.AutoParser.BUILDER.defineClass([ "com.thoughtworks.microbuilder.core.UriTemplate" ], "com.thoughtworks.microbuilder.core.UriTemplateParser")"""
+  haxeMacros in c += """autoParser.AutoParser.BUILDER.defineClass([ "com.thoughtworks.microbuilder.core.uriTemplate.UriTemplate" ], "com.thoughtworks.microbuilder.core.UriTemplateParser")"""
 }
 
 for (c <- AllTestTargetConfigurations) yield {
-  haxeMacros in c += """autoParser.AutoFormatter.BUILDER.defineClass([ "com.thoughtworks.microbuilder.core.UriTemplate" ], "com.thoughtworks.microbuilder.core.UriTemplateFormatter")"""
+  haxeMacros in c += """autoParser.AutoFormatter.BUILDER.defineClass([ "com.thoughtworks.microbuilder.core.uriTemplate.UriTemplate" ], "com.thoughtworks.microbuilder.core.UriTemplateFormatter")"""
 }
 
 for (c <- AllTestTargetConfigurations) yield {
-  haxeMacros in c += """autoParser.AutoParser.BUILDER.defineMacroClass([ "com.thoughtworks.microbuilder.core.UriTemplate" ], "com.thoughtworks.microbuilder.core.UriTemplateParser")"""
+  haxeMacros in c += """autoParser.AutoParser.BUILDER.defineMacroClass([ "com.thoughtworks.microbuilder.core.uriTemplate.UriTemplate" ], "com.thoughtworks.microbuilder.core.UriTemplateParser")"""
 }
 
 for (c <- AllTestTargetConfigurations) yield {
-  haxeMacros in c += """autoParser.AutoFormatter.BUILDER.defineMacroClass([ "com.thoughtworks.microbuilder.core.UriTemplate" ], "com.thoughtworks.microbuilder.core.UriTemplateFormatter")"""
+  haxeMacros in c += """autoParser.AutoFormatter.BUILDER.defineMacroClass([ "com.thoughtworks.microbuilder.core.uriTemplate.UriTemplate" ], "com.thoughtworks.microbuilder.core.UriTemplateFormatter")"""
 }
 
 val haxelibs = Map(

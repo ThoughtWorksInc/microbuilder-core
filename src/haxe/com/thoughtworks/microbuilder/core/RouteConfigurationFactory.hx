@@ -4,7 +4,7 @@ import haxe.ds.Option;
 import haxe.macro.Printer;
 import haxe.ds.IntMap;
 import haxe.ds.StringMap;
-import com.thoughtworks.microbuilder.core.UriTemplate;
+import com.thoughtworks.microbuilder.core.uriTemplate.UriTemplate;
 import autoParser.StringBuffer;
 import haxe.macro.PositionTools;
 import haxe.macro.MacroStringTools;
@@ -199,7 +199,7 @@ class RouteConfigurationFactory {
                         }
                       }
 
-                      var uriTemplate:Array<LiteralsOrExpression> = UriTemplateParser.parse_com_thoughtworks_microbuilder_core_UriTemplate(source);
+                      var uriTemplate:Array<LiteralsOrExpression> = UriTemplateParser.parse_com_thoughtworks_microbuilder_core_uriTemplate_UriTemplate(source);
                       var uriParameterName = generateUriParametersClassName(className, classType.pack, classType.name, fieldName);
                       var uriParameterFields:Array<Field> = [{
                         name: "new",
@@ -221,15 +221,15 @@ class RouteConfigurationFactory {
                               name: 'character_$i',
                               pos: PositionTools.here(),
                               access: [ APublic ],
-                              kind: FProp("get", "set", macro : com.thoughtworks.microbuilder.core.UriTemplate.Literals, null)
+                              kind: FProp("get", "set", macro : com.thoughtworks.microbuilder.core.uriTemplate.UriTemplate.Literals, null)
                             });
                             uriParameterFields.push({
                               name: 'set_character_$i',
                               pos: PositionTools.here(),
                               kind: FFun(
                                 {
-                                  args: [ { name: "value", type: macro : com.thoughtworks.microbuilder.core.UriTemplate.Literals } ],
-                                  ret: macro : com.thoughtworks.microbuilder.core.UriTemplate.Literals,
+                                  args: [ { name: "value", type: macro : com.thoughtworks.microbuilder.core.uriTemplate.UriTemplate.Literals } ],
+                                  ret: macro : com.thoughtworks.microbuilder.core.uriTemplate.UriTemplate.Literals,
                                   expr: macro return switch value {
                                     case $v{literals}: value;
                                     default: null;
@@ -243,7 +243,7 @@ class RouteConfigurationFactory {
                               kind: FFun(
                                 {
                                   args: [ ],
-                                  ret: macro : com.thoughtworks.microbuilder.core.UriTemplate.Literals,
+                                  ret: macro : com.thoughtworks.microbuilder.core.uriTemplate.UriTemplate.Literals,
                                   expr: macro return $v{literals}
                                 }
                               )
@@ -260,7 +260,7 @@ class RouteConfigurationFactory {
                                       throw "Level 1-3 templates does not support modifiers.";
                                     }
                                     var buffer = new StringBuffer();
-                                    UriTemplateFormatter.format_com_thoughtworks_microbuilder_core_Varname(buffer, varspec.varname);
+                                    UriTemplateFormatter.format_com_thoughtworks_microbuilder_core_uriTemplate_Varname(buffer, varspec.varname);
                                     var varname = buffer.toString();
                                     var variablePath = varname.split(".");
                                     var variablePlainName = '${generatedFieldName(variablePath)}_${seed++}';
@@ -289,7 +289,7 @@ class RouteConfigurationFactory {
                                       access: [ APublic ],
                                       name: variablePlainName,
                                       pos: PositionTools.here(),
-                                      kind: FVar(macro : com.thoughtworks.microbuilder.core.UriTemplate.SimpleStringExpansion, null)
+                                      kind: FVar(macro : com.thoughtworks.microbuilder.core.uriTemplate.UriTemplate.SimpleStringExpansion, null)
                                     });
                                     // TODO:
                                   default:
