@@ -30,18 +30,14 @@ before_install:
   - if [[ "$HAXE_TARGET" = "java" ]]; then travis_retry haxelib install hxjava --always; fi
   - if [[ "$HAXE_TARGET" = "cs" ]]; then travis_retry haxelib install hxcs --always; fi
 
-install:
-  - sbt ";++$TRAVIS_SCALA_VERSION;haxelibInstallDependencies;update"
-
 script:
-  - sbt ";++$TRAVIS_SCALA_VERSION;$SBT_COMMAND"
+  - sbt ";++$TRAVIS_SCALA_VERSION;haxelibInstallDependencies;$SBT_COMMAND"
 
 before_cache:
   - find $HOME/.sbt -name '*.lock' | xargs rm
   - find $HOME/.ivy2 -name 'ivydata-*.properties' | xargs rm
 
 jdk:
-  - oraclejdk8
   - openjdk7
 
 env:
@@ -49,6 +45,13 @@ env:
     # Haxe 3.2.1
     - SBT_COMMAND=test HAXE_TARGET=java HAXE_FILE=haxe_2015-10-12_master_deab442.tar.gz
     - SBT_COMMAND=test-csharp:run HAXE_TARGET=cs HAXE_FILE=haxe_2015-10-12_master_deab442.tar.gz
+    - SBT_COMMAND=test-cpp:haxe HAXE_TARGET=cpp HAXE_FILE=haxe_2015-10-12_master_deab442.tar.gz
+    - SBT_COMMAND=test-js:haxe HAXE_TARGET=js HAXE_FILE=haxe_2015-10-12_master_deab442.tar.gz
+    - SBT_COMMAND=test-python:haxe HAXE_TARGET=python HAXE_FILE=haxe_2015-10-12_master_deab442.tar.gz
+    - SBT_COMMAND=test-php:haxe HAXE_TARGET=php HAXE_FILE=haxe_2015-10-12_master_deab442.tar.gz
+    - SBT_COMMAND=test-neko:haxe HAXE_TARGET=neko HAXE_FILE=haxe_2015-10-12_master_deab442.tar.gz
+    - SBT_COMMAND=test-as3:haxe HAXE_TARGET=as3 HAXE_FILE=haxe_2015-10-12_master_deab442.tar.gz
+    - SBT_COMMAND=test-flash:haxe HAXE_TARGET=swf HAXE_FILE=haxe_2015-10-12_master_deab442.tar.gz
 
 notifications:
   webhooks:
@@ -65,6 +68,5 @@ deploy:
   provider: script
   script: ./deploy.sh
   on:
-    jdk: openjdk7
     condition: -e ./deploy.sh && "$HAXE_TARGET" == "java" && "$HAXE_FILE" == "haxe_2015-10-12_master_deab442.tar.gz"
     all_branches: true
