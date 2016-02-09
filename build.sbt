@@ -6,7 +6,7 @@ organization := "com.thoughtworks.microbuilder"
 
 name := "microbuilder-core"
 
-haxelibReleaseNote := "Move UriTemplate to a separate package."
+haxelibReleaseNote := "Upgrade dependencies"
 
 haxelibTags ++= Seq(
   "cross", "cpp", "cs", "flash", "java", "javascript", "js", "neko", "php", "python", "nme",
@@ -29,10 +29,10 @@ for (c <- AllHaxeConfigurations) yield {
 }
 
 for (c <- AllHaxeConfigurations) yield {
-  libraryDependencies += "com.thoughtworks.microbuilder" % "auto-parser" % "0.2.0" % c classifier c.name
+  libraryDependencies += "com.thoughtworks.microbuilder" % "auto-parser" % "0.2.1" % c classifier c.name
 }
 
-haxelibDependencies += "auto-parser" -> DependencyVersion.SpecificVersion("0.2.0")
+haxelibDependencies += "auto-parser" -> DependencyVersion.SpecificVersion("0.2.1")
 
 for (c <- AllHaxeConfigurations) yield {
   libraryDependencies += "com.thoughtworks.microbuilder" % "json-stream-core" % "3.0.0" % c classifier c.name
