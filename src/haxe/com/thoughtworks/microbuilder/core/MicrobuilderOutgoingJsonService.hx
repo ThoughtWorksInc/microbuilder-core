@@ -27,7 +27,7 @@ class MicrobuilderOutgoingJsonService implements IJsonService {
   }
 
   @:abstract
-  public function send(url:String, httpMethod:String, requestContentType:String, requestBody: String, ?responseHandler:Null<Dynamic>->?Int->?String->Void):Void {
+  public function send(url:String, httpMethod:String, requestContentType:Null<String>, requestBody:Null<String>, ?responseHandler:Null<Dynamic>->?Int->?String->Void):Void {
     throw "Not implemented!";
   }
 
