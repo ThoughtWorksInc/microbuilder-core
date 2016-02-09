@@ -22,6 +22,8 @@ developers := List(
   )
 )
 
+resolvers += "Sonatype Public" at "https://oss.sonatype.org/content/groups/public"
+
 libraryDependencies ++= Seq("com.qifun.sbt-haxe" %% "test-interface" % "0.1.1" % Test)
 
 for (c <- AllHaxeConfigurations) yield {
