@@ -1,5 +1,6 @@
 package com.thoughtworks.microbuilder.core;
 
+import com.thoughtworks.microbuilder.core.IRouteConfiguration;
 import com.dongxiguo.continuation.Continuation;
 import com.dongxiguo.continuation.utils.Generator;
 import jsonStream.rpc.IJsonService;
@@ -8,6 +9,7 @@ import jsonStream.JsonStream;
 import jsonStream.io.TextParser;
 import jsonStream.io.PrettyTextPrinter;
 import Type;
+import haxe.ds.Vector;
 
 @:abstract
 class MicrobuilderOutgoingJsonService implements IJsonService {
@@ -26,9 +28,43 @@ class MicrobuilderOutgoingJsonService implements IJsonService {
     }));
   }
 
-  @:abstract
-  public function send(url:String, httpMethod:String, requestContentType:Null<String>, requestBody:Null<String>, ?responseHandler:Null<Dynamic>->?Int->?String->Void):Void {
-    throw "Not implemented!";
+  public function send(
+    url:String, httpMethod:String,
+    requestBody:Null<String>, headers:Vector<Header>,
+    ?responseHandler:Null<Dynamic>->?Int->?String->Void):Void {
+
+		var http = new haxe.Http(url);
+		var optionalStatus:Null<Int> = null;
+		http.setHeader("User-Agent", "organization-list-cli");
+
+		http.onData = function(data:String):Void {
+			responseHandler(null, optionalStatus, data);
+		}
+
+		http.onError = function(error:String):Void {
+			responseHandler(error, optionalStatus);
+		}
+
+		http.onStatus = function(status:Int):Void {
+			optionalStatus = status;
+		}
+
+		#if js
+		http.async = true;
+		#end
+    for (header in headers) {
+      http.setHeader(header.name, header.value);
+    }
+
+		if (requestBody != null) {
+			http.setPostData(requestBody);
+		}
+		var isPost = switch httpMethod {
+			case "GET": false;
+			case "POST": true;
+			default: throw 'Unsupported HTTP method $httpMethod';
+		}
+		http.request(isPost);
   }
 
   public function push(data:JsonStream):Void {
@@ -49,8 +85,15 @@ class MicrobuilderOutgoingJsonService implements IJsonService {
                 } else {
                   null;
                 }
-                // TODO: send custom headers
-                send(url, request.httpMethod, request.contentType, requestBody);
+                var headerBuffer = [ for (header in request.headers) header ];
+                if (request.contentType != null) {
+                  headerBuffer.push(new Header("Content-Ty[e]", request.contentType));
+                }
+                if (routeEntry.responseContentType != null) {
+                  headerBuffer.push(new Header("Accept", routeEntry.responseContentType));
+                }
+                var headers = Vector.fromArrayCopy(headerBuffer);
+                send(url, request.httpMethod, requestBody, headers);
               default:
                 throw "parameter should be a JSON array";
             }
@@ -81,8 +124,15 @@ class MicrobuilderOutgoingJsonService implements IJsonService {
                 } else {
                   null;
                 }
-                // TODO: send custom headers
-                send(url, request.httpMethod, request.contentType, requestBody, function(error, ?status, ?responseBody) {
+                var headerBuffer = [ for (header in request.headers) header ];
+                if (request.contentType != null) {
+                  headerBuffer.push(new Header("Content-Ty[e]", request.contentType));
+                }
+                if (routeEntry.responseContentType != null) {
+                  headerBuffer.push(new Header("Accept", routeEntry.responseContentType));
+                }
+                var headers = Vector.fromArrayCopy(headerBuffer);
+                send(url, request.httpMethod, requestBody, headers, function(error, ?status, ?responseBody) {
                   if (error == null) {
                     if (status >= 200 && status < 400) {
                       try {
