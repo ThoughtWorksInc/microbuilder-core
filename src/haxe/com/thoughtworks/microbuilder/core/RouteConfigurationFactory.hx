@@ -81,7 +81,7 @@ class RouteConfigurationFactory {
 
 #if macro
 
-  static function fields(includeModules:Array<String>, factoryModule:String, className:String):Array<Field> return {
+  static function generateFields(includeModules:Array<String>, factoryModule:String, className:String):Array<Field> return {
     var seed = 0;
     var parserModule = '${factoryModule}_UriParametersParser';
     var parserExpr = MacroStringTools.toFieldExpr(parserModule.split("."));
@@ -1038,7 +1038,7 @@ class RouteConfigurationFactory {
       }
     }
     Context.defineModule(uriTemplatesModule, uriParametersDefinitions);
-    AutoParser.BUILDER.defineClass(
+    AutoParser.BUILDER.lazyDefineClass(
       [ '${factoryModule}_UriParameters' ],
       parserModule,
       null,
@@ -1050,7 +1050,7 @@ class RouteConfigurationFactory {
         }
       ]
     );
-    AutoFormatter.BUILDER.defineClass(
+    AutoFormatter.BUILDER.lazyDefineClass(
       [ '${factoryModule}_UriParameters' ],
       formatterModule,
       null,
@@ -1070,7 +1070,7 @@ class RouteConfigurationFactory {
   @:noUsing
   macro public static function generateRouteConfigurationFactory(includeModules:Array<String>):Array<Field> return {
     var localClass = Context.getLocalClass().get();
-    Context.getBuildFields().concat(fields(includeModules, localClass.module, localClass.name));
+    Context.getBuildFields().concat(generateFields(includeModules, localClass.module, localClass.name));
   }
 }
 

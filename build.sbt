@@ -49,19 +49,11 @@ for (c <- AllTargetConfigurations ++ AllTestTargetConfigurations) yield {
 }
 
 for (c <- AllTestTargetConfigurations) yield {
-  haxeMacros in c += """autoParser.AutoParser.BUILDER.defineClass([ "com.thoughtworks.microbuilder.core.uriTemplate.UriTemplate" ], "com.thoughtworks.microbuilder.core.UriTemplateParser")"""
+  haxeMacros in c += """autoParser.AutoParser.BUILDER.lazyDefineClass([ "com.thoughtworks.microbuilder.core.uriTemplate.UriTemplate" ], "com.thoughtworks.microbuilder.core.UriTemplateParser")"""
 }
 
 for (c <- AllTestTargetConfigurations) yield {
-  haxeMacros in c += """autoParser.AutoFormatter.BUILDER.defineClass([ "com.thoughtworks.microbuilder.core.uriTemplate.UriTemplate" ], "com.thoughtworks.microbuilder.core.UriTemplateFormatter")"""
-}
-
-for (c <- AllTestTargetConfigurations) yield {
-  haxeMacros in c += """autoParser.AutoParser.BUILDER.defineMacroClass([ "com.thoughtworks.microbuilder.core.uriTemplate.UriTemplate" ], "com.thoughtworks.microbuilder.core.UriTemplateParser")"""
-}
-
-for (c <- AllTestTargetConfigurations) yield {
-  haxeMacros in c += """autoParser.AutoFormatter.BUILDER.defineMacroClass([ "com.thoughtworks.microbuilder.core.uriTemplate.UriTemplate" ], "com.thoughtworks.microbuilder.core.UriTemplateFormatter")"""
+  haxeMacros in c += """autoParser.AutoFormatter.BUILDER.lazyDefineClass([ "com.thoughtworks.microbuilder.core.uriTemplate.UriTemplate" ], "com.thoughtworks.microbuilder.core.UriTemplateFormatter")"""
 }
 
 val haxelibs = Map(
@@ -113,3 +105,13 @@ releaseProcess := {
 releaseProcess -= runClean
 
 releaseProcess -= runTest
+
+haxeExtraParams ++= Seq(
+  "--macro",
+  "hamu.ExprEvaluator.parseAndEvaluate('autoParser.AutoFormatter.BUILDER.lazyDefineMacroClass([\"com.thoughtworks.microbuilder.core.uriTemplate.UriTemplate\"],\"com.thoughtworks.microbuilder.core.UriTemplateFormatter\")')"
+)
+
+haxeExtraParams ++= Seq(
+  "--macro",
+  "hamu.ExprEvaluator.parseAndEvaluate('autoParser.AutoParser.BUILDER.lazyDefineMacroClass([\"com.thoughtworks.microbuilder.core.uriTemplate.UriTemplate\"],\"com.thoughtworks.microbuilder.core.UriTemplateParser\")')"
+)
