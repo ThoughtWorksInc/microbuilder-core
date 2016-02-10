@@ -29,6 +29,7 @@ before_install:
   - haxelib setup $HOME/.haxelib-local
   - if [[ "$HAXE_TARGET" = "java" ]]; then travis_retry haxelib install hxjava --always; fi
   - if [[ "$HAXE_TARGET" = "cs" ]]; then travis_retry haxelib install hxcs --always; fi
+  - if [[ "$HAXE_TARGET" = "cpp" ]]; then travis_retry haxelib install hxcpp --always; fi
 
 script:
   - sbt ";++$TRAVIS_SCALA_VERSION;haxelibInstallDependencies;$SBT_COMMAND"
