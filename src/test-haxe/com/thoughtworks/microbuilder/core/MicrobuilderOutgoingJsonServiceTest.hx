@@ -45,7 +45,7 @@ class MockService extends MicrobuilderOutgoingJsonService {
   public var toBeCalled:Bool = false;
   public var url:String;
 
-  public override function send(url:String, httpMethod:String, requestContentType:String, requestBody: String, ?responseHandler:Null<Dynamic>->?Int->?String->Void) {
+  public override function send(url:String, httpMethod:String, requestBody: String, headers, ?responseHandler:Null<Dynamic>->?Int->?String->Void) {
     toBeCalled = true;
     this.url = url;
   }
