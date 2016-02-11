@@ -799,7 +799,7 @@ class RouteConfigurationFactory {
                                     var ensureNoMorePairsExprs = [
                                       for (key in currentNode.submap.keys()) {
                                         macro if (!$i{handledValuesName}.exists($v{key})) {
-                                          throw "Bad data"; // TODO: Excpetion definition
+                                          throw "Bad data"; // TODO: Exception definition
                                         }
                                       }
                                     ];
