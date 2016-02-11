@@ -32,39 +32,38 @@ class MicrobuilderOutgoingJsonService implements IJsonService {
     url:String, httpMethod:String,
     requestBody:Null<String>, headers:Vector<Header>,
     ?responseHandler:Null<Dynamic>->?Int->?String->Void):Void {
-
-		var http = new haxe.Http(url);
-		var optionalStatus:Null<Int> = null;
-		http.setHeader("User-Agent", "organization-list-cli");
-
-		http.onData = function(data:String):Void {
-			responseHandler(null, optionalStatus, data);
-		}
-
-		http.onError = function(error:String):Void {
-			responseHandler(error, optionalStatus);
-		}
-
-		http.onStatus = function(status:Int):Void {
-			optionalStatus = status;
-		}
-
-		#if js
-		http.async = true;
-		#end
+  
+  	var http = new haxe.Http(url);
+  	var optionalStatus:Null<Int> = null;
+  	
+  	http.onData = function(data:String):Void {
+  		responseHandler(null, optionalStatus, data);
+  	}
+  	
+  	http.onError = function(error:String):Void {
+  		responseHandler(error, optionalStatus);
+  	}
+  	
+  	http.onStatus = function(status:Int):Void {
+  		optionalStatus = status;
+  	}
+  	
+  	#if js
+  	http.async = true;
+  	#end
     for (header in headers) {
       http.setHeader(header.name, header.value);
     }
-
-		if (requestBody != null) {
-			http.setPostData(requestBody);
-		}
-		var isPost = switch httpMethod {
-			case "GET": false;
-			case "POST": true;
-			default: throw 'Unsupported HTTP method $httpMethod';
-		}
-		http.request(isPost);
+  
+  	if (requestBody != null) {
+  		http.setPostData(requestBody);
+  	}
+  	var isPost = switch httpMethod {
+  		case "GET": false;
+  		case "POST": true;
+  		default: throw 'Unsupported HTTP method $httpMethod';
+  	}
+  	http.request(isPost);
   }
 
   public function push(data:JsonStream):Void {
