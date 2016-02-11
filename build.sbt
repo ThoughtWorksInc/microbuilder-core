@@ -48,6 +48,8 @@ for (c <- AllTargetConfigurations ++ AllTestTargetConfigurations) yield {
   haxeOptions in c += (baseDirectory.value / "build.hxml").getAbsolutePath
 }
 
+haxeOptions in TestCpp += "--no-opt" // Workaround for https://github.com/HaxeFoundation/haxe/issues/4844
+
 for (c <- AllTestTargetConfigurations) yield {
   haxeMacros in c += """autoParser.AutoParser.BUILDER.lazyDefineClass([ "com.thoughtworks.microbuilder.core.uriTemplate.UriTemplate" ], "com.thoughtworks.microbuilder.core.UriTemplateParser")"""
 }
