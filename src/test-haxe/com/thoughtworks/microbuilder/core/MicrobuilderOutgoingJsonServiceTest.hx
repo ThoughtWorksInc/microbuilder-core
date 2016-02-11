@@ -1,5 +1,7 @@
 package com.thoughtworks.microbuilder.core;
 
+#if (!cpp) // Disable this test for C++ target because of https://github.com/misprintt/mockatoo/issues/48
+
 import haxe.ds.Vector;
 import haxe.unit.TestCase;
 import jsonStream.JsonSerializer;
@@ -50,3 +52,5 @@ class MockService extends MicrobuilderOutgoingJsonService {
     this.url = url;
   }
 }
+
+#end

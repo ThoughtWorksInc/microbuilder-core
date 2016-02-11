@@ -76,7 +76,7 @@ class MatchResult {
 /**
  *
  */
-@:nativeGen
+#if (!cpp) @:nativeGen #end
 interface IRouteEntry {
 
   /**

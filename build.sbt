@@ -6,7 +6,7 @@ organization := "com.thoughtworks.microbuilder"
 
 name := "microbuilder-core"
 
-haxelibReleaseNote := "Add a general implementation for outgoing services"
+haxelibReleaseNote := "Fix build for C++ target"
 
 haxelibTags ++= Seq(
   "cross", "cpp", "cs", "flash", "java", "javascript", "js", "neko", "php", "python", "nme",
