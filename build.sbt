@@ -6,7 +6,7 @@ organization := "com.thoughtworks.microbuilder"
 
 name := "microbuilder-core"
 
-haxelibReleaseNote := "Fix build for C++ target"
+haxelibReleaseNote := "Fix generated extraParams.hxml"
 
 haxelibTags ++= Seq(
   "cross", "cpp", "cs", "flash", "java", "javascript", "js", "neko", "php", "python", "nme",
@@ -108,12 +108,6 @@ releaseProcess -= runClean
 
 releaseProcess -= runTest
 
-haxeExtraParams ++= Seq(
-  "--macro",
-  "hamu.ExprEvaluator.parseAndEvaluate('autoParser.AutoFormatter.BUILDER.lazyDefineMacroClass([\"com.thoughtworks.microbuilder.core.uriTemplate.UriTemplate\"],\"com.thoughtworks.microbuilder.core.UriTemplateFormatter\")')"
-)
+haxeExtraParams += "--macro hamu.ExprEvaluator.parseAndEvaluate('autoParser.AutoFormatter.BUILDER.lazyDefineMacroClass([\"com.thoughtworks.microbuilder.core.uriTemplate.UriTemplate\"],\"com.thoughtworks.microbuilder.core.UriTemplateFormatter\")')"
 
-haxeExtraParams ++= Seq(
-  "--macro",
-  "hamu.ExprEvaluator.parseAndEvaluate('autoParser.AutoParser.BUILDER.lazyDefineMacroClass([\"com.thoughtworks.microbuilder.core.uriTemplate.UriTemplate\"],\"com.thoughtworks.microbuilder.core.UriTemplateParser\")')"
-)
+haxeExtraParams += "--macro hamu.ExprEvaluator.parseAndEvaluate('autoParser.AutoParser.BUILDER.lazyDefineMacroClass([\"com.thoughtworks.microbuilder.core.uriTemplate.UriTemplate\"],\"com.thoughtworks.microbuilder.core.UriTemplateParser\")')"
