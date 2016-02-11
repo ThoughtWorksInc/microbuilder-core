@@ -111,3 +111,5 @@ releaseProcess -= runTest
 haxeExtraParams += "--macro hamu.ExprEvaluator.parseAndEvaluate('autoParser.AutoFormatter.BUILDER.lazyDefineMacroClass([\"com.thoughtworks.microbuilder.core.uriTemplate.UriTemplate\"],\"com.thoughtworks.microbuilder.core.UriTemplateFormatter\")')"
 
 haxeExtraParams += "--macro hamu.ExprEvaluator.parseAndEvaluate('autoParser.AutoParser.BUILDER.lazyDefineMacroClass([\"com.thoughtworks.microbuilder.core.uriTemplate.UriTemplate\"],\"com.thoughtworks.microbuilder.core.UriTemplateParser\")')"
+
+doc in Compile <<= doc in Haxe
