@@ -71,8 +71,6 @@ for (c <- AllTargetConfigurations ++ AllTestTargetConfigurations) yield {
   haxeOptions in c ++= haxelibOptions(haxelibs)
 }
 
-doxRegex in Compile ++= Seq("--include", """^jsonStream$""", "--include", """^jsonStream\.""")
-
 homepage := Some(url(s"https://github.com/ThoughtWorksInc/${name.value}"))
 
 startYear := Some(2015)
