@@ -27,7 +27,7 @@ before_install:
   - export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HOME/opt/neko
   - export HAXE_STD_PATH=$HOME/opt/haxe/std
   - haxelib setup $HOME/.haxelib-local
-  - haxelib install dox
+  - travis_retry haxelib install dox --always
   - if [[ "$HAXE_TARGET" = "java" ]]; then travis_retry haxelib install hxjava --always; fi
   - if [[ "$HAXE_TARGET" = "cs" ]]; then travis_retry haxelib install hxcs --always; fi
   - if [[ "$HAXE_TARGET" = "cpp" ]]; then travis_retry haxelib install hxcpp --always; fi
