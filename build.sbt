@@ -6,7 +6,7 @@ organization := "com.thoughtworks.microbuilder"
 
 name := "microbuilder-core"
 
-haxelibReleaseNote := "Remove default user agent when sending requests"
+haxelibReleaseNote := "Upgrade json-stream-core dependency"
 
 haxelibTags ++= Seq(
   "cross", "cpp", "cs", "flash", "java", "javascript", "js", "neko", "php", "python", "nme",
