@@ -111,3 +111,5 @@ haxeExtraParams += "--macro hamu.ExprEvaluator.parseAndEvaluate('autoParser.Auto
 haxeExtraParams += "--macro hamu.ExprEvaluator.parseAndEvaluate('autoParser.AutoParser.BUILDER.lazyDefineMacroClass([\"com.thoughtworks.microbuilder.core.uriTemplate.UriTemplate\"],\"com.thoughtworks.microbuilder.core.UriTemplateParser\")')"
 
 doc in Compile <<= doc in Haxe
+
+isLibrary := true
